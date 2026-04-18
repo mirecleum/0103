@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>МДК 01.03 — Разработка мобильных приложений</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #0a0a1a;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            cursor: crosshair;
+            color: #fff;
+        }
+
+        /* ===== CANVAS FOR STARS ===== */
+        #starCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* ===== INTERACTIVE GLOW THAT FOLLOWS MOUSE ===== */
+        .mouse-glow {
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.04) 40%, transparent 70%);
+            transform: translate(-50%, -50%);
+            transition: left 0.3s ease-out, top 0.3s ease-out;
+        }
+
+        /* ===== AURORA BACKGROUND ===== */
+        .aurora {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .aurora-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.3;
+            animation: auroraFloat 20s ease-in-out infinite;
+        }
+
+        .aurora-blob:nth-child(1) {
+            width: 500px;
+            height: 500px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            top: -10%;
+            left: -5%;
+            animation-duration: 25s;
+        }
+
+        .aurora-blob:nth-child(2) {
+            width: 400px;
+            height: 400px;
+            background: linear-gradient(135deg, #3b82f6, #06b6d4);
+            top: 50%;
+            right: -10%;
+            animation-duration: 20s;
+            animation-delay: -5s;
+        }
+
+        .aurora-blob:nth-child(3) {
+            width: 350px;
+            height: 350px;
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            bottom: -5%;
+            left: 30%;
+            animation-duration: 22s;
+            animation-delay: -10s;
+        }
+
+        @keyframes auroraFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(80px, -60px) scale(1.1); }
+            50% { transform: translate(-40px, 80px) scale(0.9); }
+            75% { transform: translate(60px, 40px) scale(1.05); }
+        }
+
+        /* ===== GRID OVERLAY ===== */
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background-image: 
+                linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .container {
+            position: relative;
+            z-index: 10;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        /* ===== WISH NOTIFICATION ===== */
+        .wish-notification {
+            position: fixed;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: rgba(139, 92, 246, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            padding: 14px 28px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            color: #c4b5fd;
+            z-index: 1000;
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            white-space: nowrap;
+        }
+
+        .wish-notification.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .wish-notification .wish-icon {
+            margin-right: 8px;
+        }
+
+        /* ===== HEADER SECTION ===== */
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #a5b4fc;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .badge-dot {
+            width: 6px;
+            height: 6px;
+            background: #6366f1;
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
+            50% { opacity: 0.7; box-shadow: 0 0 0 8px rgba(99, 102, 241, 0); }
+        }
+
+        .title {
+            font-size: clamp(2.2rem, 5vw, 4rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 16px;
+            animation: fadeInUp 0.8s ease-out 0.1s both;
+        }
+
+        .title-line1 {
+            display: block;
+            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 50%, #a5b4fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .title-line2 {
+            display: block;
+            background: linear-gradient(135deg, #818cf8 0%, #6366f1 30%, #8b5cf6 60%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            color: #64748b;
+            font-weight: 300;
+            max-width: 500px;
+            margin: 0 auto;
+            line-height: 1.6;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        .subtitle span {
+            color: #a5b4fc;
+            font-weight: 400;
+        }
+
+        .star-hint {
+            margin-top: 16px;
+            font-size: 0.8rem;
+            color: #475569;
+            animation: fadeInUp 0.8s ease-out 0.3s both;
+        }
+
+        .star-hint .sparkle {
+            color: #fbbf24;
+            animation: twinkle 2s ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* ===== PROJECT CARDS ===== */
+        .cards-wrapper {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 24px;
+            max-width: 800px;
+            width: 100%;
+            animation: fadeInUp 0.8s ease-out 0.4s both;
+        }
+
+        .card {
+            position: relative;
+            background: rgba(15, 15, 35, 0.6);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 36px;
+            text-decoration: none;
+            color: #fff;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            border: 1px solid rgba(99, 102, 241, 0.1);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(99, 102, 241, 0.06), transparent 60%);
+            pointer-events: none;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(99, 102, 241, 0.25);
+            box-shadow: 0 20px 60px rgba(99, 102, 241, 0.1), 0 0 0 1px rgba(99, 102, 241, 0.1);
+        }
+
+        .card-icon-wrapper {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .card:nth-child(1) {
+            --accent: #f59e0b;
+        }
+
+        .card:nth-child(1) .card-icon-wrapper {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05));
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .card:nth-child(2) {
+            --accent: #10b981;
+        }
+
+        .card:nth-child(2) .card-icon-wrapper {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05));
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            transition: color 0.3s;
+        }
+
+        .card:nth-child(1):hover .card-title { color: #fbbf24; }
+        .card:nth-child(2):hover .card-title { color: #34d399; }
+
+        .card-description {
+            font-size: 0.9rem;
+            color: #64748b;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-tags {
+            display: flex;
+            gap: 6px;
+        }
+
+        .card-tag {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            background: rgba(99, 102, 241, 0.08);
+            color: #818cf8;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+        }
+
+        .card-arrow {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .card-arrow svg {
+            width: 16px;
+            height: 16px;
+            stroke: #64748b;
+            transition: all 0.3s;
+        }
+
+        .card:hover .card-arrow {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .card:hover .card-arrow svg {
+            stroke: #fff;
+            transform: translateX(2px);
+        }
+
+        /* ===== SHOOTING STAR (CSS ONES) ===== */
+        .shooting-star {
+            position: fixed;
+            width: 3px;
+            height: 3px;
+            background: #fff;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .shooting-star::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: 100%;
+            width: 80px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6));
+            transform: translateY(-50%);
+        }
+
+        /* ===== WISH COUNTER ===== */
+        .wish-counter {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(15, 15, 35, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            padding: 10px 18px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            color: #64748b;
+            transition: all 0.3s;
+        }
+
+        .wish-counter:hover {
+            border-color: rgba(139, 92, 246, 0.3);
+            color: #a5b4fc;
+        }
+
+        .wish-count {
+            color: #fbbf24;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* ===== CLICK RIPPLE ===== */
+        .click-star {
+            position: fixed;
+            pointer-events: none;
+            z-index: 999;
+            font-size: 1.2rem;
+            animation: starBurst 1s ease-out forwards;
+        }
+
+        @keyframes starBurst {
+            0% { opacity: 1; transform: scale(0.5) translateY(0); }
+            100% { opacity: 0; transform: scale(1.5) translateY(-80px); }
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            animation: fadeInUp 0.8s ease-out 0.6s both;
+        }
+
+        .footer-text {
+            font-size: 0.75rem;
+            color: #334155;
+            letter-spacing: 1px;
+        }
+
+        .footer-line {
+            width: 40px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #334155, transparent);
+            margin: 12px auto;
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .cards-wrapper {
+                grid-template-columns: 1fr;
+                max-width: 420px;
+            }
+
+            .card {
+                padding: 28px;
+            }
+
+            .wish-counter {
+                bottom: 16px;
+                right: 16px;
+            }
+        }
+
+        /* ===== CONSTELLATION LINES ===== */
+        .constellation-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Aurora Background -->
+    <div class="aurora">
+        <div class="aurora-blob"></div>
+        <div class="aurora-blob"></div>
+        <div class="aurora-blob"></div>
+    </div>
+
+    <!-- Grid Overlay -->
+    <div class="grid-overlay"></div>
+
+    <!-- Star Canvas -->
+    <canvas id="starCanvas"></canvas>
+
+    <!-- Constellation Canvas -->
+    <canvas class="constellation-canvas" id="constellationCanvas"></canvas>
+
+    <!-- Mouse Glow -->
+    <div class="mouse-glow" id="mouseGlow"></div>
+
+    <!-- Wish Notification -->
+    <div class="wish-notification" id="wishNotification">
+        <span class="wish-icon">🌠</span>
+        <span id="wishText">Загадайте желание!</span>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <header class="header">
+            <div class="badge">
+                <span class="badge-dot"></span>
+                Портфолио проектов
+            </div>
+            <h1 class="title">
+                <span class="title-line1">МДК 01.03</span>
+                <span class="title-line2">Разработка мобильных приложений</span>
+            </h1>
+            <p class="subtitle">
+                Лабораторные работы по курсу — <span>веб-приложения</span>, адаптивная вёрстка и интерактивный дизайн
+            </p>
+            <p class="star-hint">
+                <span class="sparkle">✦</span> Кликните по падающей звезде, чтобы загадать желание <span class="sparkle">✦</span>
+            </p>
+        </header>
+
+        <div class="cards-wrapper">
+            <!-- Card 1: Food Express -->
+            <a href="https://mirecleum.github.io/0103/food-express/" target="_blank" class="card" id="card1">
+                <div class="card-icon-wrapper">🍔</div>
+                <h2 class="card-title">Food Express</h2>
+                <p class="card-description">
+                    Сервис быстрой доставки еды — каталог блюд, корзина, оформление заказа. Адаптивный интерфейс с современным дизайном.
+                </p>
+                <div class="card-footer">
+                    <div class="card-tags">
+                        <span class="card-tag">HTML</span>
+                        <span class="card-tag">CSS</span>
+                        <span class="card-tag">JS</span>
+                    </div>
+                    <div class="card-arrow">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Card 2: Fit Tracker -->
+            <a href="https://mirecleum.github.io/0103/fit-tracker/" target="_blank" class="card" id="card2">
+                <div class="card-icon-wrapper">💪</div>
+                <h2 class="card-title">Fit Tracker</h2>
+                <p class="card-description">
+                    Трекер фитнеса и здоровья — отслеживание тренировок, статистика активности, персональные цели и прогресс.
+                </p>
+                <div class="card-footer">
+                    <div class="card-tags">
+                        <span class="card-tag">HTML</span>
+                        <span class="card-tag">CSS</span>
+                        <span class="card-tag">JS</span>
+                    </div>
+                    <div class="card-arrow">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <footer class="footer">
+            <div class="footer-line"></div>
+            <p class="footer-text">2025 • МДК 01.03</p>
+        </footer>
+    </div>
+
+    <!-- Wish Counter -->
+    <div class="wish-counter" id="wishCounter">
+        <span>⭐</span>
+        <span>Желаний: <span class="wish-count" id="wishCount">0</span></span>
+    </div>
+
+    <script>
+        // ===== CONFIGURATION =====
+        const STAR_COUNT = 200;
+        const SHOOTING_STAR_INTERVAL = 4000;
+        const CONSTELLATION_POINTS = 8;
+
+        // ===== STATE =====
+        let wishCount = 0;
+        let mouseX = window.innerWidth / 2;
+        let mouseY = window.innerHeight / 2;
+        let shootingStars = [];
+        let staticStars = [];
+        let constellationPoints = [];
+
+        // ===== WISH MESSAGES =====
+        const wishes = [
+            "✨ Звезда поймана! Желание загадано!",
+            "🌟 Отличный улов! Мечтайте смелее!",
+            "💫 Космическое желание принято!",
+            "⭐ Вселенная услышала вас!",
+            "🌠 Звёздная пыль на удачу!",
+            "✦ Сдано на «отлично» — загадано!",
+            "🔮 Магия кода исполнит желание!",
+            "🚀 Желание отправлено в космос!",
+            "🌌 Галактика одобряет!",
+            "💎 Редкая звезда! Двойное желание!",
+        ];
+
+        // ===== STAR CANVAS =====
+        const canvas = document.getElementById('starCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // ===== STATIC STARS =====
+        class StaticStar {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 1.5 + 0.3;
+                this.opacity = Math.random() * 0.8 + 0.2;
+                this.twinkleSpeed = Math.random() * 0.02 + 0.005;
+                this.twinkleOffset = Math.random() * Math.PI * 2;
+            }
+
+            draw(time) {
+                const twinkle = Math.sin(time * this.twinkleSpeed + this.twinkleOffset) * 0.3 + 0.7;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity * twinkle})`;
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < STAR_COUNT; i++) {
+            staticStars.push(new StaticStar());
+        }
+
+        // ===== SHOOTING STARS =====
+        class ShootingStar {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * canvas.width * 1.5;
+                this.y = -10;
+                this.speed = Math.random() * 8 + 6;
+                this.angle = (Math.random() * 20 + 25) * (Math.PI / 180);
+                this.length = Math.random() * 80 + 60;
+                this.opacity = 1;
+                this.size = Math.random() * 2 + 1.5;
+                this.active = true;
+                this.caught = false;
+                this.fadeSpeed = Math.random() * 0.008 + 0.004;
+                // Hitbox for clicking
+                this.hitRadius = 30;
+            }
+
+            update() {
+                if (!this.active) return;
+                this.x -= Math.cos(this.angle) * this.speed;
+                this.y += Math.sin(this.angle) * this.speed;
+                this.opacity -= this.fadeSpeed;
+
+                if (this.opacity <= 0 || this.y > canvas.height + 50 || this.x < -100) {
+                    this.active = false;
+                }
+            }
+
+            draw() {
+                if (!this.active) return;
+
+                const tailX = this.x + Math.cos(this.angle) * this.length;
+                const tailY = this.y - Math.sin(this.angle) * this.length;
+
+                // Tail gradient
+                const gradient = ctx.createLinearGradient(this.x, this.y, tailX, tailY);
+                gradient.addColorStop(0, `rgba(255, 255, 255, ${this.opacity})`);
+                gradient.addColorStop(0.3, `rgba(200, 200, 255, ${this.opacity * 0.5})`);
+                gradient.addColorStop(1, `rgba(100, 100, 255, 0)`);
+
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y);
+                ctx.lineTo(tailX, tailY);
+                ctx.strokeStyle = gradient;
+                ctx.lineWidth = this.size;
+                ctx.lineCap = 'round';
+                ctx.stroke();
+
+                // Head glow
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size + 1, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                ctx.fill();
+
+                // Outer glow
+                const glowGradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, 12);
+                glowGradient.addColorStop(0, `rgba(180, 180, 255, ${this.opacity * 0.4})`);
+                glowGradient.addColorStop(1, 'transparent');
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 12, 0, Math.PI * 2);
+                ctx.fillStyle = glowGradient;
+                ctx.fill();
+            }
+
+            isHit(mx, my) {
+                const dx = this.x - mx;
+                const dy = this.y - my;
+                return Math.sqrt(dx * dx + dy * dy) < this.hitRadius;
+            }
+        }
+
+        function spawnShootingStar() {
+            const star = new ShootingStar();
+            shootingStars.push(star);
+        }
+
+        setInterval(spawnShootingStar, SHOOTING_STAR_INTERVAL);
+        // Spawn a few immediately
+        setTimeout(spawnShootingStar, 1000);
+        setTimeout(spawnShootingStar, 2500);
+
+        // ===== CONSTELLATION =====
+        const constCanvas = document.getElementById('constellationCanvas');
+        const constCtx = constCanvas.getContext('2d');
+
+        function resizeConstCanvas() {
+            constCanvas.width = window.innerWidth;
+            constCanvas.height = window.innerHeight;
+        }
+        resizeConstCanvas();
+        window.addEventListener('resize', resizeConstCanvas);
+
+        for (let i = 0; i < CONSTELLATION_POINTS; i++) {
+            constellationPoints.push({
+                x: Math.random() * window.innerWidth,
+                y: Math.random() * window.innerHeight,
+                vx: (Math.random() - 0.5) * 0.3,
+                vy: (Math.random() - 0.5) * 0.3,
+                size: Math.random() * 2 + 1
+            });
+        }
+
+        function drawConstellations(time) {
+            constCtx.clearRect(0, 0, constCanvas.width, constCanvas.height);
+
+            // Update positions
+            constellationPoints.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                if (p.x < 0 || p.x > constCanvas.width) p.vx *= -1;
+                if (p.y < 0 || p.y > constCanvas.height) p.vy *= -1;
+            });
+
+            // Draw connections to mouse
+            const connectionDist = 200;
+            constellationPoints.forEach(p => {
+                const dx = p.x - mouseX;
+                const dy = p.y - mouseY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist < connectionDist) {
+                    const alpha = (1 - dist / connectionDist) * 0.15;
+                    constCtx.beginPath();
+                    constCtx.moveTo(p.x, p.y);
+                    constCtx.lineTo(mouseX, mouseY);
+                    constCtx.strokeStyle = `rgba(139, 92, 246, ${alpha})`;
+                    constCtx.lineWidth = 0.5;
+                    constCtx.stroke();
+                }
+            });
+
+            // Draw connections between nearby points
+            for (let i = 0; i < constellationPoints.length; i++) {
+                for (let j = i + 1; j < constellationPoints.length; j++) {
+                    const a = constellationPoints[i];
+                    const b = constellationPoints[j];
+                    const dx = a.x - b.x;
+                    const dy = a.y - b.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < 250) {
+                        const alpha = (1 - dist / 250) * 0.06;
+                        constCtx.beginPath();
+                        constCtx.moveTo(a.x, a.y);
+                        constCtx.lineTo(b.x, b.y);
+                        constCtx.strokeStyle = `rgba(99, 102, 241, ${alpha})`;
+                        constCtx.lineWidth = 0.5;
+                        constCtx.stroke();
+                    }
+                }
+            }
+
+            // Draw points
+            constellationPoints.forEach(p => {
+                const twinkle = Math.sin(time * 0.003 + p.x) * 0.3 + 0.7;
+                constCtx.beginPath();
+                constCtx.arc(p.x, p.y, p.size * twinkle, 0, Math.PI * 2);
+                constCtx.fillStyle = `rgba(165, 180, 252, ${0.4 * twinkle})`;
+                constCtx.fill();
+            });
+        }
+
+        // ===== MAIN ANIMATION LOOP =====
+        function animate(time) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw static stars
+            staticStars.forEach(star => star.draw(time));
+
+            // Update & draw shooting stars
+            shootingStars = shootingStars.filter(s => s.active);
+            shootingStars.forEach(star => {
+                star.update();
+                star.draw();
+            });
+
+            // Constellations
+            drawConstellations(time);
+
+            requestAnimationFrame(animate);
+        }
+        requestAnimationFrame(animate);
+
+        // ===== MOUSE TRACKING =====
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+
+            const glow = document.getElementById('mouseGlow');
+            glow.style.left = e.clientX + 'px';
+            glow.style.top = e.clientY + 'px';
+
+            // Card internal glow effect
+            document.querySelectorAll('.card').forEach(card => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                card.style.setProperty('--mouse-x', x + 'px');
+                card.style.setProperty('--mouse-y', y + 'px');
+            });
+        });
+
+        // ===== CLICK TO CATCH SHOOTING STARS =====
+        document.addEventListener('click', (e) => {
+            let caughtOne = false;
+
+            shootingStars.forEach(star => {
+                if (star.active && !star.caught && star.isHit(e.clientX, e.clientY)) {
+                    star.caught = true;
+                    star.active = false;
+                    caughtOne = true;
+                }
+            });
+
+            if (caughtOne) {
+                wishCount++;
+                document.getElementById('wishCount').textContent = wishCount;
+
+                // Show notification
+                const msg = wishes[Math.floor(Math.random() * wishes.length)];
+                showWishNotification(msg);
+
+                // Burst effect
+                createStarBurst(e.clientX, e.clientY);
+            } else {
+                // Small click sparkle regardless
+                createClickSparkle(e.clientX, e.clientY);
+            }
+        });
+
+        // ===== WISH NOTIFICATION =====
+        function showWishNotification(text) {
+            const notif = document.getElementById('wishNotification');
+            document.getElementById('wishText').textContent = text;
+            notif.classList.add('show');
+
+            setTimeout(() => {
+                notif.classList.remove('show');
+            }, 3000);
+        }
+
+        // ===== STAR BURST EFFECT =====
+        function createStarBurst(x, y) {
+            const emojis = ['⭐', '✨', '💫', '🌟', '✦', '★'];
+            for (let i = 0; i < 8; i++) {
+                const el = document.createElement('div');
+                el.className = 'click-star';
+                el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                el.style.left = (x + (Math.random() - 0.5) * 60) + 'px';
+                el.style.top = (y + (Math.random() - 0.5) * 60) + 'px';
+                el.style.animationDuration = (0.6 + Math.random() * 0.6) + 's';
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), 1200);
+            }
+        }
+
+        function createClickSparkle(x, y) {
+            const emojis = ['✦', '·', '✧'];
+            for (let i = 0; i < 3; i++) {
+                const el = document.createElement('div');
+                el.className = 'click-star';
+                el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                el.style.left = (x + (Math.random() - 0.5) * 30) + 'px';
+                el.style.top = (y + (Math.random() - 0.5) * 30) + 'px';
+                el.style.fontSize = '0.7rem';
+                el.style.color = '#6366f1';
+                el.style.animationDuration = '0.8s';
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), 900);
+            }
+        }
+
+        // ===== TOUCH SUPPORT =====
+        document.addEventListener('touchstart', (e) => {
+            const touch = e.touches[0];
+            mouseX = touch.clientX;
+            mouseY = touch.clientY;
+        });
+
+        document.addEventListener('touchmove', (e) => {
+            const touch = e.touches[0];
+            mouseX = touch.clientX;
+            mouseY = touch.clientY;
+            const glow = document.getElementById('mouseGlow');
+            glow.style.left = touch.clientX + 'px';
+            glow.style.top = touch.clientY + 'px';
+        });
+    </script>
+</body>
+</html>
