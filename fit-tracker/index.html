@@ -1,0 +1,1563 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitTracker — Полная инструкция по созданию Android-приложения</title>
+    <style>
+        :root {
+            --transition: 0.3s;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #111827;
+            --bg-tertiary: #1f2937;
+            --bg-card: #151c2c;
+            --bg-code: #0d1117;
+            --bg-code-header: #1e2733;
+            --bg-hover: #263040;
+            --bg-input: #1f2937;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --text-tertiary: #6b7280;
+            --text-link: #60a5fa;
+            --text-code: #e5e7eb;
+            --text-heading: #f9fafb;
+            --border-primary: #374151;
+            --border-secondary: #1f2937;
+            --accent: #10b981;
+            --accent-hover: #34d399;
+            --accent-bg: rgba(16,185,129,0.12);
+            --accent2: #6366f1;
+            --accent2-bg: rgba(99,102,241,0.12);
+            --success: #10b981;
+            --success-bg: rgba(16,185,129,0.1);
+            --warning: #f59e0b;
+            --warning-bg: rgba(245,158,11,0.1);
+            --error: #ef4444;
+            --error-bg: rgba(239,68,68,0.1);
+            --info: #3b82f6;
+            --info-bg: rgba(59,130,246,0.1);
+            --shadow: 0 8px 32px rgba(0,0,0,0.5);
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+            --kw: #f472b6;
+            --str: #86efac;
+            --cmt: #6b7280;
+            --fn: #c084fc;
+            --cls: #93c5fd;
+            --num: #67e8f9;
+            --prop: #fbbf24;
+            --ann: #fb923c;
+            --tag: #34d399;
+            --atn: #93c5fd;
+            --atv: #86efac;
+            --gradient-start: #10b981;
+            --gradient-end: #6366f1;
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f3f4f6;
+            --bg-tertiary: #e5e7eb;
+            --bg-card: #ffffff;
+            --bg-code: #f8fafc;
+            --bg-code-header: #e2e8f0;
+            --bg-hover: #e5e7eb;
+            --bg-input: #f3f4f6;
+            --text-primary: #111827;
+            --text-secondary: #4b5563;
+            --text-tertiary: #9ca3af;
+            --text-link: #2563eb;
+            --text-code: #1e293b;
+            --text-heading: #030712;
+            --border-primary: #d1d5db;
+            --border-secondary: #e5e7eb;
+            --accent: #059669;
+            --accent-hover: #047857;
+            --accent-bg: rgba(5,150,105,0.08);
+            --accent2: #4f46e5;
+            --accent2-bg: rgba(79,70,229,0.08);
+            --success: #059669;
+            --success-bg: rgba(5,150,105,0.06);
+            --warning: #d97706;
+            --warning-bg: rgba(217,119,6,0.06);
+            --error: #dc2626;
+            --error-bg: rgba(220,38,38,0.06);
+            --info: #2563eb;
+            --info-bg: rgba(37,99,235,0.06);
+            --shadow: 0 4px 24px rgba(0,0,0,0.08);
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+            --kw: #be185d;
+            --str: #065f46;
+            --cmt: #9ca3af;
+            --fn: #7c3aed;
+            --cls: #1d4ed8;
+            --num: #0891b2;
+            --prop: #b45309;
+            --ann: #c2410c;
+            --tag: #059669;
+            --atn: #1d4ed8;
+            --atv: #065f46;
+            --gradient-start: #059669;
+            --gradient-end: #4f46e5;
+        }
+
+        * { margin:0; padding:0; box-sizing:border-box; }
+        html { scroll-behavior:smooth; scroll-padding-top:80px; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            transition: background var(--transition), color var(--transition);
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-secondary); }
+        ::-webkit-scrollbar-thumb { background: var(--border-primary); border-radius: 3px; }
+
+        /* ===== HEADER ===== */
+        .header {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-primary);
+            backdrop-filter: blur(16px);
+            transition: all var(--transition);
+        }
+        .header-inner {
+            max-width: 1320px; margin: 0 auto; padding: 0 24px;
+            height: 60px; display: flex; align-items: center; justify-content: space-between;
+        }
+        .logo {
+            display: flex; align-items: center; gap: 10px;
+            text-decoration: none; color: var(--text-heading); font-weight: 800; font-size: 19px;
+        }
+        .logo-icon { font-size: 26px; }
+        .logo span.accent-text { background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .logo-badge {
+            background: var(--accent); color: #fff; font-size: 10px;
+            padding: 2px 8px; border-radius: 10px; font-weight: 700;
+        }
+        .header-right { display: flex; align-items: center; gap: 16px; }
+        .progress-text { font-size: 12px; color: var(--text-tertiary); font-weight: 600; }
+
+        /* Theme Toggle */
+        .theme-btn {
+            width: 40px; height: 40px; border-radius: 10px;
+            background: var(--bg-tertiary); border: 1px solid var(--border-primary);
+            cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .theme-btn:hover { border-color: var(--accent); background: var(--accent-bg); }
+
+        .progress-bar-container {
+            position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+            background: var(--border-secondary);
+        }
+        .progress-bar {
+            height: 100%; width: 0%;
+            background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+            border-radius: 0 3px 3px 0; transition: width 0.2s;
+        }
+
+        /* ===== SIDEBAR ===== */
+        .layout { display: flex; max-width: 1320px; margin: 60px auto 0; }
+
+        .sidebar {
+            position: fixed; top: 60px;
+            left: max(0px, calc((100vw - 1320px) / 2));
+            width: 260px; height: calc(100vh - 60px);
+            overflow-y: auto; padding: 20px 12px;
+            border-right: 1px solid var(--border-secondary);
+            background: var(--bg-primary); transition: all var(--transition); z-index: 100;
+        }
+        .sidebar::-webkit-scrollbar { width: 3px; }
+
+        .sidebar-label {
+            font-size: 10px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1.2px; color: var(--text-tertiary);
+            padding: 14px 12px 6px; margin-top: 4px;
+        }
+        .sidebar-nav { list-style: none; }
+        .sidebar-nav a {
+            display: flex; align-items: center; gap: 8px;
+            padding: 7px 12px; color: var(--text-secondary); text-decoration: none;
+            border-radius: 8px; font-size: 13px; transition: all 0.15s; margin-bottom: 1px;
+        }
+        .sidebar-nav a:hover { background: var(--bg-hover); color: var(--text-primary); }
+        .sidebar-nav a.active { background: var(--accent-bg); color: var(--accent); font-weight: 600; }
+        .nav-num {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 20px; height: 20px; border-radius: 5px;
+            background: var(--bg-tertiary); font-size: 10px; font-weight: 700; flex-shrink: 0;
+        }
+        .sidebar-nav a.active .nav-num { background: var(--accent); color: #fff; }
+
+        /* ===== MAIN ===== */
+        .main {
+            margin-left: 260px; flex: 1; min-height: calc(100vh - 60px);
+            padding: 36px 52px 120px; max-width: calc(1320px - 260px);
+        }
+
+        /* ===== HERO ===== */
+        .hero {
+            background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+            border-radius: 20px; padding: 52px; margin-bottom: 44px; color: #fff;
+            position: relative; overflow: hidden;
+        }
+        .hero::before {
+            content: ''; position: absolute; top: -60%; right: -15%;
+            width: 420px; height: 420px; border-radius: 50%;
+            background: rgba(255,255,255,0.08);
+        }
+        .hero::after {
+            content: '🏋️'; position: absolute; top: 24px; right: 48px;
+            font-size: 90px; opacity: 0.2;
+        }
+        .hero h1 { font-size: 38px; font-weight: 900; margin-bottom: 10px; position: relative; }
+        .hero p { font-size: 17px; opacity: 0.92; max-width: 580px; position: relative; line-height: 1.6; }
+        .hero-tags { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; position: relative; }
+        .hero-tag {
+            display: flex; align-items: center; gap: 6px;
+            background: rgba(255,255,255,0.15); padding: 7px 16px;
+            border-radius: 20px; font-size: 13px; font-weight: 600;
+            backdrop-filter: blur(4px);
+        }
+
+        /* ===== STATS ===== */
+        .stats { display: flex; gap: 14px; margin-bottom: 36px; flex-wrap: wrap; }
+        .stat {
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px 20px; background: var(--bg-secondary);
+            border-radius: 12px; border: 1px solid var(--border-secondary); font-size: 14px;
+        }
+        .stat-val { font-weight: 800; font-size: 20px; color: var(--accent); }
+        .stat-label { color: var(--text-secondary); }
+
+        /* ===== PART DIVIDER ===== */
+        .part {
+            text-align: center; margin: 56px 0 40px; position: relative;
+        }
+        .part::before {
+            content: ''; position: absolute; top: 50%; left: 0; right: 0;
+            height: 1px; background: var(--border-primary);
+        }
+        .part h2 {
+            display: inline-flex; align-items: center; gap: 10px;
+            background: var(--bg-primary); padding: 6px 24px;
+            position: relative; font-size: 18px; color: var(--text-heading); font-weight: 700;
+        }
+        .part-num {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 30px; height: 30px; border-radius: 8px;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            color: #fff; font-weight: 800; font-size: 13px;
+        }
+
+        /* ===== STEP ===== */
+        .step { margin-bottom: 44px; scroll-margin-top: 80px; }
+        .step-head {
+            display: flex; align-items: flex-start; gap: 14px;
+            margin-bottom: 18px; padding-bottom: 14px;
+            border-bottom: 2px solid var(--border-secondary);
+        }
+        .step-num {
+            display: flex; align-items: center; justify-content: center;
+            min-width: 42px; height: 42px; border-radius: 12px;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            color: #fff; font-weight: 800; font-size: 17px; flex-shrink: 0;
+        }
+        .step-head h2 { font-size: 22px; font-weight: 700; color: var(--text-heading); }
+        .step-sub { font-size: 13px; color: var(--text-secondary); margin-top: 3px; }
+        .step-body { padding-left: 56px; }
+        .step-body p { margin-bottom: 14px; color: var(--text-secondary); font-size: 15px; }
+        .step-body strong { color: var(--text-primary); }
+        .step-body ol, .step-body ul { padding-left: 22px; margin-bottom: 14px; }
+        .step-body li { margin-bottom: 6px; color: var(--text-secondary); font-size: 14px; }
+
+        /* ===== CODE ===== */
+        .code {
+            margin: 14px 0 20px; border-radius: 12px;
+            border: 1px solid var(--border-primary); overflow: hidden;
+            background: var(--bg-code); transition: all var(--transition);
+        }
+        .code-top {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 8px 14px; background: var(--bg-code-header);
+            border-bottom: 1px solid var(--border-primary); font-size: 12px;
+        }
+        .code-name { display: flex; align-items: center; gap: 7px; font-weight: 600; color: var(--text-primary); }
+        .code-right { display: flex; align-items: center; gap: 8px; }
+        .lang-badge {
+            font-size: 10px; padding: 2px 8px; border-radius: 5px;
+            font-weight: 700; text-transform: uppercase;
+        }
+        .lang-kt { background: #7c3aed20; color: #a78bfa; }
+        [data-theme="light"] .lang-kt { color: #6d28d9; }
+        .lang-xml { background: #f59e0b20; color: #fbbf24; }
+        [data-theme="light"] .lang-xml { color: #b45309; }
+        .lang-gradle { background: #10b98120; color: #34d399; }
+        [data-theme="light"] .lang-gradle { color: #047857; }
+
+        .copy-btn {
+            display: flex; align-items: center; gap: 5px;
+            padding: 3px 10px; border-radius: 5px;
+            border: 1px solid var(--border-primary); background: var(--bg-tertiary);
+            color: var(--text-secondary); font-size: 11px; cursor: pointer;
+            transition: all 0.15s; font-family: inherit;
+        }
+        .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .copy-btn.ok { background: var(--success-bg); color: var(--success); border-color: var(--success); }
+
+        .code-body {
+            padding: 14px 16px; overflow-x: auto; font-size: 13px; line-height: 1.65;
+        }
+        .code-body pre { margin: 0; font-family: 'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace; }
+        .code-body code { font-family: inherit; color: var(--text-code); }
+
+        .kw { color: var(--kw); font-weight: 600; }
+        .str { color: var(--str); }
+        .cmt { color: var(--cmt); font-style: italic; }
+        .fn { color: var(--fn); }
+        .cls { color: var(--cls); }
+        .num { color: var(--num); }
+        .prop { color: var(--prop); }
+        .ann { color: var(--ann); }
+        .tag { color: var(--tag); }
+        .atn { color: var(--atn); }
+        .atv { color: var(--atv); }
+
+        /* inline code */
+        code:not(.code-body code) {
+            background: var(--bg-tertiary); padding: 2px 6px; border-radius: 4px;
+            font-family: 'JetBrains Mono',monospace; font-size: 0.85em;
+            color: var(--accent); border: 1px solid var(--border-secondary);
+        }
+
+        /* ===== COLLAPSIBLE ===== */
+        .coll {
+            margin: 14px 0; border: 1px solid var(--border-primary);
+            border-radius: 12px; overflow: hidden;
+        }
+        .coll-head {
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px 16px; background: var(--bg-secondary);
+            cursor: pointer; user-select: none; font-weight: 600;
+            font-size: 14px; color: var(--text-primary); transition: all 0.15s;
+        }
+        .coll-head:hover { background: var(--bg-hover); }
+        .coll-arrow { transition: transform 0.25s; font-size: 11px; color: var(--text-tertiary); }
+        .coll.open .coll-arrow { transform: rotate(90deg); }
+        .coll-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; }
+        .coll.open .coll-body { max-height: 80000px; transition: max-height 0.8s ease-in; }
+        .coll-inner { padding: 16px; border-top: 1px solid var(--border-secondary); }
+
+        /* ===== CALLOUT ===== */
+        .callout {
+            display: flex; gap: 12px; padding: 14px 16px;
+            border-radius: 10px; margin: 14px 0; font-size: 14px; line-height: 1.6;
+        }
+        .callout-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+        .c-info { background: var(--info-bg); border-left: 3px solid var(--info); }
+        .c-success { background: var(--success-bg); border-left: 3px solid var(--success); }
+        .c-warn { background: var(--warning-bg); border-left: 3px solid var(--warning); }
+        .c-accent { background: var(--accent-bg); border-left: 3px solid var(--accent); }
+        .c-accent2 { background: var(--accent2-bg); border-left: 3px solid var(--accent2); }
+
+        /* ===== EXPLAIN ===== */
+        .explain {
+            background: var(--bg-secondary); border-radius: 12px;
+            padding: 18px 22px; margin: 14px 0; border: 1px solid var(--border-secondary);
+        }
+        .explain h4 {
+            color: var(--accent); margin-bottom: 8px; font-size: 14px;
+            display: flex; align-items: center; gap: 7px;
+        }
+        .explain p, .explain li { font-size: 13px; color: var(--text-secondary); }
+        .explain ul { padding-left: 18px; }
+        .explain li { margin-bottom: 4px; }
+
+        /* ===== FILE TREE ===== */
+        .tree {
+            background: var(--bg-secondary); border: 1px solid var(--border-primary);
+            border-radius: 12px; padding: 18px 22px;
+            font-family: 'JetBrains Mono',monospace; font-size: 12px; line-height: 1.9; margin: 14px 0; white-space: pre; overflow-x: auto;
+        }
+        .tree .f { color: var(--info); font-weight: 600; }
+        .tree .d { color: var(--text-tertiary); }
+        .tree .h { color: var(--accent); font-weight: 600; }
+
+        /* ===== TABLE ===== */
+        .tbl { overflow-x: auto; margin: 14px 0; border-radius: 12px; border: 1px solid var(--border-primary); }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+            font-weight: 600; color: var(--text-primary); border-bottom: 2px solid var(--border-primary); }
+        td { padding: 9px 14px; border-bottom: 1px solid var(--border-secondary); color: var(--text-secondary); }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: var(--bg-hover); }
+
+        /* ===== CHECKBOX ===== */
+        .check {
+            display: flex; align-items: center; gap: 8px;
+            margin-top: 14px; padding: 9px 12px; background: var(--bg-secondary);
+            border-radius: 8px; cursor: pointer; user-select: none;
+            font-size: 13px; color: var(--text-secondary); transition: all 0.15s;
+        }
+        .check:hover { background: var(--bg-hover); }
+        .check input { display: none; }
+        .check-box {
+            width: 18px; height: 18px; border-radius: 5px;
+            border: 2px solid var(--border-primary);
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.15s; flex-shrink: 0;
+        }
+        .check input:checked + .check-box { background: var(--success); border-color: var(--success); }
+        .check input:checked + .check-box::after { content: '✓'; color: #fff; font-size: 11px; font-weight: 800; }
+        .check input:checked ~ .check-label { text-decoration: line-through; color: var(--text-tertiary); }
+
+        /* ===== BACK TO TOP ===== */
+        .top-btn {
+            position: fixed; bottom: 28px; right: 28px;
+            width: 44px; height: 44px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            color: #fff; border: none; cursor: pointer; font-size: 18px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: var(--shadow); opacity: 0; transform: translateY(16px);
+            transition: all 0.3s; z-index: 50;
+        }
+        .top-btn.show { opacity: 1; transform: translateY(0); }
+        .top-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(16,185,129,0.3); }
+
+        /* ===== MOBILE ===== */
+        .mob-btn {
+            display: none; background: none; border: none;
+            color: var(--text-primary); font-size: 22px; cursor: pointer; padding: 4px;
+        }
+        .overlay {
+            display: none; position: fixed; top: 60px; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 99;
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%); left: 0; width: 260px;
+                z-index: 200; box-shadow: var(--shadow);
+            }
+            .sidebar.open { transform: translateX(0); }
+            .overlay.on { display: block; }
+            .main { margin-left: 0; padding: 24px 20px 100px; max-width: 100%; }
+            .mob-btn { display: block; }
+            .step-body { padding-left: 0; }
+            .hero { padding: 32px 24px; }
+            .hero h1 { font-size: 28px; }
+            .hero::after { font-size: 56px; top: 12px; right: 16px; }
+        }
+        @media (max-width: 600px) {
+            .hero-tags { flex-direction: column; gap: 6px; }
+            .stats { flex-direction: column; }
+            .code-body { font-size: 11px; padding: 10px 12px; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <div class="header-inner">
+        <div style="display:flex;align-items:center;gap:14px;">
+            <button class="mob-btn" onclick="toggleSidebar()" aria-label="Меню">☰</button>
+            <a href="#" class="logo">
+                <span class="logo-icon">💪</span>
+                <span class="accent-text">FitTracker</span>
+                <span class="logo-badge">Инструкция</span>
+            </a>
+        </div>
+        <div class="header-right">
+            <span class="progress-text" id="pctText">0%</span>
+            <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" title="Сменить тему">🌙</button>
+        </div>
+    </div>
+    <div class="progress-bar-container"><div class="progress-bar" id="pbar"></div></div>
+</header>
+
+<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+<div class="layout">
+<aside class="sidebar" id="sidebar">
+    <ul class="sidebar-nav" id="sideNav">
+        <li><div class="sidebar-label">Начало</div></li>
+        <li><a href="#s1"><span class="nav-num">1</span> Создание проекта</a></li>
+        <li><a href="#s2"><span class="nav-num">2</span> Зависимости</a></li>
+        <li><a href="#s3"><span class="nav-num">3</span> Структура пакетов</a></li>
+        <li><div class="sidebar-label">Модели данных</div></li>
+        <li><a href="#s4"><span class="nav-num">4</span> Workout</a></li>
+        <li><a href="#s5"><span class="nav-num">5</span> Exercise</a></li>
+        <li><a href="#s6"><span class="nav-num">6</span> UserProfile</a></li>
+        <li><a href="#s7"><span class="nav-num">7</span> FitRepository</a></li>
+        <li><div class="sidebar-label">Ресурсы</div></li>
+        <li><a href="#s8"><span class="nav-num">8</span> Цвета и тема</a></li>
+        <li><a href="#s9"><span class="nav-num">9</span> Строки и размеры</a></li>
+        <li><a href="#s10"><span class="nav-num">10</span> Drawable</a></li>
+        <li><a href="#s11"><span class="nav-num">11</span> Иконки</a></li>
+        <li><div class="sidebar-label">Навигация</div></li>
+        <li><a href="#s12"><span class="nav-num">12</span> Меню</a></li>
+        <li><a href="#s13"><span class="nav-num">13</span> Nav Graph</a></li>
+        <li><div class="sidebar-label">Макеты</div></li>
+        <li><a href="#s14"><span class="nav-num">14</span> Activity и Auth</a></li>
+        <li><a href="#s15"><span class="nav-num">15</span> Main и Dashboard</a></li>
+        <li><a href="#s16"><span class="nav-num">16</span> Тренировки</a></li>
+        <li><a href="#s17"><span class="nav-num">17</span> Статистика</a></li>
+        <li><a href="#s18"><span class="nav-num">18</span> Профиль</a></li>
+        <li><a href="#s19"><span class="nav-num">19</span> Item-макеты</a></li>
+        <li><div class="sidebar-label">Адаптеры</div></li>
+        <li><a href="#s20"><span class="nav-num">20</span> WorkoutAdapter</a></li>
+        <li><a href="#s21"><span class="nav-num">21</span> ExerciseAdapter</a></li>
+        <li><div class="sidebar-label">Фрагменты</div></li>
+        <li><a href="#s22"><span class="nav-num">22</span> LoginFragment</a></li>
+        <li><a href="#s23"><span class="nav-num">23</span> RegisterFragment</a></li>
+        <li><a href="#s24"><span class="nav-num">24</span> MainFragment</a></li>
+        <li><a href="#s25"><span class="nav-num">25</span> DashboardFragment</a></li>
+        <li><a href="#s26"><span class="nav-num">26</span> WorkoutsFragment</a></li>
+        <li><a href="#s27"><span class="nav-num">27</span> StatsFragment</a></li>
+        <li><a href="#s28"><span class="nav-num">28</span> ProfileFragment</a></li>
+        <li><a href="#s29"><span class="nav-num">29</span> WorkoutDetailFrag</a></li>
+        <li><div class="sidebar-label">Финал</div></li>
+        <li><a href="#s30"><span class="nav-num">30</span> MainActivity</a></li>
+        <li><a href="#s31"><span class="nav-num">31</span> Запуск и тесты</a></li>
+    </ul>
+</aside>
+
+<main class="main" id="mainContent">
+
+<!-- HERO -->
+<div class="hero">
+    <h1>💪 FitTracker</h1>
+    <p>Создаём Android-приложение для отслеживания тренировок с нуля. Авторизация, дашборд, каталог упражнений, статистика и профиль пользователя.</p>
+    <div class="hero-tags">
+        <div class="hero-tag">📱 7+ экранов</div>
+        <div class="hero-tag">🧭 Navigation</div>
+        <div class="hero-tag">📊 Статистика</div>
+        <div class="hero-tag">🎨 Material 3</div>
+        <div class="hero-tag">📐 MVVM</div>
+    </div>
+</div>
+
+<div class="stats">
+    <div class="stat"><span class="stat-val">31</span><span class="stat-label">шаг</span></div>
+    <div class="stat"><span class="stat-val">45+</span><span class="stat-label">файлов</span></div>
+    <div class="stat"><span class="stat-val" id="doneCount">0</span><span class="stat-label">выполнено</span></div>
+</div>
+
+<!-- ======================== PART 1 ======================== -->
+<div class="part"><h2><span class="part-num">1</span> Настройка проекта</h2></div>
+
+<!-- STEP 1 -->
+<section class="step" id="s1">
+    <div class="step-head">
+        <div class="step-num">1</div>
+        <div><h2>Создание проекта</h2><div class="step-sub">Новый проект в Android Studio</div></div>
+    </div>
+    <div class="step-body">
+        <ol>
+            <li>Откройте <strong>Android Studio</strong> → <strong>File → New → New Project</strong></li>
+            <li>Выберите <strong>Empty Views Activity</strong></li>
+            <li>Заполните:</li>
+        </ol>
+        <div class="tbl"><table>
+            <tr><th>Параметр</th><th>Значение</th></tr>
+            <tr><td>Name</td><td><strong>FitTracker</strong></td></tr>
+            <tr><td>Package</td><td><strong>com.example.fittracker</strong></td></tr>
+            <tr><td>Language</td><td><strong>Kotlin</strong></td></tr>
+            <tr><td>Min SDK</td><td><strong>API 24</strong></td></tr>
+            <tr><td>Build config</td><td><strong>Kotlin DSL</strong></td></tr>
+        </table></div>
+        <ol start="4"><li>Нажмите <strong>Finish</strong></li></ol>
+        <label class="check"><input type="checkbox" onchange="updateProgress()"><span class="check-box"></span><span class="check-label">Проект создан</span></label>
+    </div>
+</section>
+
+<!-- STEP 2 -->
+<section class="step" id="s2">
+    <div class="step-head">
+        <div class="step-num">2</div>
+        <div><h2>Зависимости и ViewBinding</h2><div class="step-sub">Подключаем Navigation, ViewModel, RecyclerView</div></div>
+    </div>
+    <div class="step-body">
+        <p>Откройте <code>build.gradle.kts</code> (<strong>Module :app</strong>).</p>
+
+        <div class="code">
+            <div class="code-top">
+                <span class="code-name">📄 build.gradle.kts (Module :app)</span>
+                <div class="code-right">
+                    <span class="lang-badge lang-gradle">Gradle</span>
+                    <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                </div>
+            </div>
+            <div class="code-body"><pre><code><span class="cmt">// В блоке android { } добавьте:</span>
+<span class="kw">android</span> {
+    <span class="cmt">// ... существующий код ...</span>
+
+    <span class="prop">buildFeatures</span> {
+        <span class="prop">viewBinding</span> = <span class="kw">true</span>
+    }
+}
+
+<span class="cmt">// Замените блок dependencies:</span>
+<span class="kw">dependencies</span> {
+    <span class="fn">implementation</span>(libs.androidx.core.ktx)
+    <span class="fn">implementation</span>(libs.androidx.appcompat)
+    <span class="fn">implementation</span>(libs.material)
+    <span class="fn">implementation</span>(libs.androidx.activity)
+    <span class="fn">implementation</span>(libs.androidx.constraintlayout)
+
+    <span class="cmt">// Navigation</span>
+    <span class="fn">implementation</span>(<span class="str">"androidx.navigation:navigation-fragment-ktx:2.7.7"</span>)
+    <span class="fn">implementation</span>(<span class="str">"androidx.navigation:navigation-ui-ktx:2.7.7"</span>)
+
+    <span class="cmt">// ViewModel + LiveData</span>
+    <span class="fn">implementation</span>(<span class="str">"androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0"</span>)
+    <span class="fn">implementation</span>(<span class="str">"androidx.lifecycle:lifecycle-livedata-ktx:2.7.0"</span>)
+
+    <span class="cmt">// RecyclerView + CardView</span>
+    <span class="fn">implementation</span>(<span class="str">"androidx.recyclerview:recyclerview:1.3.2"</span>)
+    <span class="fn">implementation</span>(<span class="str">"androidx.cardview:cardview:1.0.0"</span>)
+
+    <span class="cmt">// ProgressBar (круговые диаграммы будем делать кастомно)</span>
+
+    <span class="fn">testImplementation</span>(libs.junit)
+    <span class="fn">androidTestImplementation</span>(libs.androidx.junit)
+    <span class="fn">androidTestImplementation</span>(libs.androidx.espresso.core)
+}</code></pre></div>
+        </div>
+
+        <div class="explain">
+            <h4>🔍 Что даёт каждая библиотека?</h4>
+            <ul>
+                <li><strong>Navigation</strong> — управление переходами. Забудьте про ручные FragmentTransaction!</li>
+                <li><strong>ViewModel</strong> — хранит данные экрана при повороте. LiveData оповещает UI при изменении.</li>
+                <li><strong>ViewBinding</strong> — типобезопасный доступ к View без <code>findViewById</code>. Генерирует класс-обёртку для каждого layout.</li>
+            </ul>
+        </div>
+
+        <div class="callout c-warn">
+            <span class="callout-icon">⚠️</span>
+            <div>После редактирования — жмите <strong>Sync Now</strong> в жёлтой полоске.</div>
+        </div>
+
+        <label class="check"><input type="checkbox" onchange="updateProgress()"><span class="check-box"></span><span class="check-label">Зависимости синхронизированы</span></label>
+    </div>
+</section>
+
+<!-- STEP 3 -->
+<section class="step" id="s3">
+    <div class="step-head">
+        <div class="step-num">3</div>
+        <div><h2>Структура пакетов</h2><div class="step-sub">Организация кода по feature-модулям</div></div>
+    </div>
+    <div class="step-body">
+        <p>ПКМ на <code>com.example.fittracker</code> → <strong>New → Package</strong> для каждого.</p>
+        <div class="tree">
+<span class="f">📁 com.example.fittracker/</span>
+├── <span class="f">📁 model/</span>           <span class="d">← data-классы</span>
+├── <span class="f">📁 repository/</span>      <span class="d">← хранилище данных</span>
+├── <span class="f">📁 adapter/</span>         <span class="d">← адаптеры RecyclerView</span>
+├── <span class="f">📁 ui/</span>
+│   ├── <span class="f">📁 auth/</span>        <span class="d">← логин, регистрация</span>
+│   ├── <span class="f">📁 dashboard/</span>   <span class="d">← главный экран с прогрессом</span>
+│   ├── <span class="f">📁 workouts/</span>    <span class="d">← список тренировок</span>
+│   ├── <span class="f">📁 stats/</span>       <span class="d">← статистика и графики</span>
+│   ├── <span class="f">📁 profile/</span>     <span class="d">← профиль пользователя</span>
+│   └── <span class="f">📁 detail/</span>      <span class="d">← детали тренировки</span>
+├── <span class="h">📄 MainActivity.kt</span>
+└── <span class="h">📄 MainFragment.kt</span> <span class="d">(в ui/)</span>
+        </div>
+        <label class="check"><input type="checkbox" onchange="updateProgress()"><span class="check-box"></span><span class="check-label">Пакеты созданы</span></label>
+    </div>
+</section>
+
+<!-- ======================== PART 2 ======================== -->
+<div class="part"><h2><span class="part-num">2</span> Модели данных</h2></div>
+
+<!-- STEP 4 -->
+<section class="step" id="s4">
+    <div class="step-head">
+        <div class="step-num">4</div>
+        <div><h2>Модель Workout</h2><div class="step-sub">Тренировка — основная сущность приложения</div></div>
+    </div>
+    <div class="step-body">
+        <p>В пакете <code>model</code> → <strong>New → Kotlin Class/File</strong> → <strong>Data Class</strong> → <code>Workout</code></p>
+
+        <div class="code">
+            <div class="code-top">
+                <span class="code-name">📄 model/Workout.kt</span>
+                <div class="code-right"><span class="lang-badge lang-kt">Kotlin</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div>
+            </div>
+            <div class="code-body"><pre><code><span class="kw">package</span> com.example.fittracker.model
+
+<span class="kw">data class</span> <span class="cls">Workout</span>(
+    <span class="kw">val</span> <span class="prop">id</span>: <span class="cls">Int</span>,
+    <span class="kw">val</span> <span class="prop">name</span>: <span class="cls">String</span>,             <span class="cmt">// "Утренняя пробежка"</span>
+    <span class="kw">val</span> <span class="prop">type</span>: <span class="cls">WorkoutType</span>,        <span class="cmt">// CARDIO, STRENGTH...</span>
+    <span class="kw">val</span> <span class="prop">durationMin</span>: <span class="cls">Int</span>,         <span class="cmt">// длительность в минутах</span>
+    <span class="kw">val</span> <span class="prop">calories</span>: <span class="cls">Int</span>,            <span class="cmt">// сожжённые калории</span>
+    <span class="kw">val</span> <span class="prop">exercises</span>: <span class="cls">List</span>&lt;<span class="cls">Exercise</span>&gt;, <span class="cmt">// упражнения в тренировке</span>
+    <span class="kw">val</span> <span class="prop">date</span>: <span class="cls">String</span>,             <span class="cmt">// "2024-01-15"</span>
+    <span class="kw">val</span> <span class="prop">difficulty</span>: <span class="cls">Difficulty</span> = <span class="cls">Difficulty</span>.MEDIUM,
+    <span class="kw">val</span> <span class="prop">iconResId</span>: <span class="cls">Int</span>,           <span class="cmt">// drawable-иконка</span>
+    <span class="kw">var</span> <span class="prop">isCompleted</span>: <span class="cls">Boolean</span> = <span class="kw">false</span>
+)
+
+<span class="kw">enum class</span> <span class="cls">WorkoutType</span>(<span class="kw">val</span> <span class="prop">label</span>: <span class="cls">String</span>, <span class="kw">val</span> <span class="prop">emoji</span>: <span class="cls">String</span>) {
+    CARDIO(<span class="str">"Кардио"</span>, <span class="str">"🏃"</span>),
+    STRENGTH(<span class="str">"Силовая"</span>, <span class="str">"🏋️"</span>),
+    YOGA(<span class="str">"Йога"</span>, <span class="str">"🧘"</span>),
+    STRETCHING(<span class="str">"Растяжка"</span>, <span class="str">"🤸"</span>),
+    HIIT(<span class="str">"HIIT"</span>, <span class="str">"⚡"</span>)
+}
+
+<span class="kw">enum class</span> <span class="cls">Difficulty</span>(<span class="kw">val</span> <span class="prop">label</span>: <span class="cls">String</span>) {
+    EASY(<span class="str">"Лёгкая"</span>),
+    MEDIUM(<span class="str">"Средняя"</span>),
+    HARD(<span class="str">"Тяжёлая"</span>)
+}</code></pre></div>
+        </div>
+
+        <div class="explain">
+            <h4>🔍 Разбор кода</h4>
+            <ul>
+                <li><code>enum class WorkoutType</code> — перечисление с параметрами. Каждый тип имеет человеко-читаемое имя и эмодзи. Это типобезопаснее, чем строки: компилятор не даст передать невалидный тип.</li>
+                <li><code>var isCompleted</code> — мутабельное поле, потому что пользователь может отметить тренировку выполненной.</li>
+                <li><code>List&lt;Exercise&gt;</code> — тренировка содержит список упражнений. Это отношение «один-ко-многим».</li>
+            </ul>
+        </div>
+
+        <label class="check"><input type="checkbox" onchange="updateProgress()"><span class="check-box"></span><span class="check-label">Workout.kt создан</span></label>
+    </div>
+</section>
+
+<!-- STEP 5 -->
+<section class="step" id="s5">
+    <div class="step-head">
+        <div class="step-num">5</div>
+        <div><h2>Модель Exercise</h2><div class="step-sub">Упражнение внутри тренировки</div></div>
+    </div>
+    <div class="step-body">
+        <div class="code">
+            <div class="code-top">
+                <span class="code-name">📄 model/Exercise.kt</span>
+                <div class="code-right"><span class="lang-badge lang-kt">Kotlin</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div>
+            </div>
+            <div class="code-body"><pre><code><span class="kw">package</span> com.example.fittracker.model
+
+<span class="kw">data class</span> <span class="cls">Exercise</span>(
+    <span class="kw">val</span> <span class="prop">name</span>: <span class="cls">String</span>,          <span class="cmt">// "Приседания"</span>
+    <span class="kw">val</span> <span class="prop">sets</span>: <span class="cls">Int</span>,             <span class="cmt">// кол-во подходов</span>
+    <span class="kw">val</span> <span class="prop">reps</span>: <span class="cls">Int</span>,             <span class="cmt">// повторений в подходе</span>
+    <span class="kw">val</span> <span class="prop">weight</span>: <span class="cls">Double</span> = <span class="num">0.0</span>,  <span class="cmt">// вес (0 = своё тело)</span>
+    <span class="kw">val</span> <span class="prop">restSec</span>: <span class="cls">Int</span> = <span class="num">60</span>,     <span class="cmt">// отдых между подходами</span>
+    <span class="kw">val</span> <span class="prop">muscleGroup</span>: <span class="cls">String</span> = <span class="str">""</span> <span class="cmt">// "Ноги", "Грудь"...</span>
+)</code></pre></div>
+        </div>
+        <label class="check"><input type="checkbox" onchange="updateProgress()"><span class="check-box"></span><span class="check-label">Exercise.kt создан</span></label>
+    </div>
+</section>
+
+<!-- STEP 6 -->
+<section class="step" id="s6">
+    <div class="step-head">
+        <div class="step-num">6</div>
+        <div><h2>Модель UserProfile</h2><div class="step-sub">Данные пользователя и его параметры</div></div>
+    </div>
+    <div class="step-body">
+        <div class="code">
+            <div class="code-top">
+                <span class="code-name">📄 model/UserProfile.kt</span>
+                <div class="code-right"><span class="lang-badge lang-kt">Kotlin</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div>
+            </div>
+            <div class="code-body"><pre><code><span class="kw">package</span> com.example.fittracker.model
+
+<span class="kw">data class</span> <span class="cls">UserProfile</span>(
+    <span class="kw">val</span> <span class="prop">name</span>: <span class="cls">String</span>,
+    <span class="kw">val</span> <span class="prop">email</span>: <span class="cls">String</span>,
+    <span class="kw">val</span> <span class="prop">age</span>: <span class="cls">Int</span> = <span class="num">25</span>,
+    <span class="kw">val</span> <span class="prop">weight</span>: <span class="cls">Double</span> = <span class="num">70.0</span>,     <span class="cmt">// кг</span>
+    <span class="kw">val</span> <span class="prop">height</span>: <span class="cls">Int</span> = <span class="num">175</span>,        <span class="cmt">// см</span>
+    <span class="kw">val</span> <span class="prop">goalCalories</span>: <span class="cls">Int</span> = <span class="num">500</span>,  <span class="cmt">// дневная цель ккал</span>
+    <span class="kw">val</span> <span class="prop">goalWorkouts</span>: <span class="cls">Int</span> = <span class="num">4</span>,    <span class="cmt">// тренировок в неделю</span>
+    <span class="kw">val</span> <span class="prop">goalSteps</span>: <span class="cls">Int</span> = <span class="num">10000</span>    <span class="cmt">// шагов в день</span>
+) {
+    <span class="kw">val</span> <span class="prop">bmi</span>: <span class="cls">Double</span>
+        <span class="kw">get</span>() = weight / ((height / <span class="num">100.0</span>) * (height / <span class="num">100.0</span>))
+
+    <span class="kw">val</span> <span class="prop">bmiCategory</span>: <span class="cls">String</span>
+        <span class="kw">get</span>() = <span class="kw">when</span> {
+            bmi &lt; <span class="num">18.5</span> -> <span class="str">"Недостаточный вес"</span>
+            bmi &lt; <span class="num">25.0</span> -> <span class="str">"Нормальный вес"</span>
+            bmi &lt; <span class="num">30.0</span> -> <span class="str">"Избыточный вес"</span>
+            <span class="kw">else</span> -> <span class="str">"Ожирение"</span>
+        }
+}</code></pre></div>
+        </div>
+
+        <div class="explain">
+            <h4>🔍 Вычисляемые свойства</h4>
+            <ul>
+                <li><code>val bmi: Double get() = ...</code> — это <strong>вычисляемое свойство</strong> (computed property). Оно не хранится в памяти, а вычисляется при каждом обращении. Идеально для производных значений.</li>
+                <li><code>when { }</code> — аналог switch/if-else. Идиоматичный Kotlin для выбора по диапазону.</li>
+            </ul>
+        </div>
+
+        <label class="check"><input type="checkbox" onchange="updateProgress()"><span class="check-box"></span><span class="check-label">UserProfile.kt создан</span></label>
+    </div>
+</section>
+
+<!-- STEP 7 -->
+<section class="step" id="s7">
+    <div class="step-head">
+        <div class="step-num">7</div>
+        <div><h2>FitRepository — хранилище данных</h2><div class="step-sub">Синглтон с тренировками, статистикой и профилем</div></div>
+    </div>
+    <div class="step-body">
+        <p>В пакете <code>repository</code> → <strong>New → Kotlin Class/File</strong> → <strong>Object</strong> → <code>FitRepository</code></p>
+
+        <div class="callout c-accent2">
+            <span class="callout-icon">🏗️</span>
+            <div><strong>Repository Pattern</strong> — единая точка доступа к данным. Фрагменты не знают, откуда берутся данные (БД, сеть, кэш). В будущем можно легко заменить захардкоженные данные на Room или Retrofit.</div>
+        </div>
+
+        <div class="coll open">
+            <div class="coll-head" onclick="toggleColl(this)">
+                <span class="coll-arrow">▶</span>
+                📄 FitRepository.kt — полный код
+            </div>
+            <div class="coll-body"><div class="coll-inner">
+                <div class="code">
+                    <div class="code-top">
+                        <span class="code-name">📄 repository/FitRepository.kt</span>
+                        <div class="code-right"><span class="lang-badge lang-kt">Kotlin</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div>
+                    </div>
+                    <div class="code-body"><pre><code><span class="kw">package</span> com.example.fittracker.repository
+
+<span class="kw">import</span> androidx.lifecycle.MutableLiveData
+<span class="kw">import</span> com.example.fittracker.R
+<span class="kw">import</span> com.example.fittracker.model.*
+
+<span class="kw">object</span> <span class="cls">FitRepository</span> {
+
+    <span class="kw">var</span> <span class="prop">currentUser</span>: <span class="cls">UserProfile</span>? = <span class="kw">null</span>
+
+    <span class="cmt">// Тренировки пользователя — LiveData для реактивного UI</span>
+    <span class="kw">val</span> <span class="prop">workouts</span> = <span class="cls">MutableLiveData</span>&lt;<span class="cls">MutableList</span>&lt;<span class="cls">Workout</span>&gt;&gt;(
+        <span class="fn">getDefaultWorkouts</span>().<span class="fn">toMutableList</span>()
+    )
+
+    <span class="cmt">// Сегодняшняя статистика</span>
+    <span class="kw">val</span> <span class="prop">todayCalories</span> = <span class="cls">MutableLiveData</span>(<span class="num">0</span>)
+    <span class="kw">val</span> <span class="prop">todaySteps</span> = <span class="cls">MutableLiveData</span>(<span class="num">6540</span>)
+    <span class="kw">val</span> <span class="prop">todayMinutes</span> = <span class="cls">MutableLiveData</span>(<span class="num">0</span>)
+    <span class="kw">val</span> <span class="prop">weeklyWorkouts</span> = <span class="cls">MutableLiveData</span>(<span class="num">0</span>)
+
+    <span class="kw">fun</span> <span class="fn">getDefaultWorkouts</span>(): <span class="cls">List</span>&lt;<span class="cls">Workout</span>&gt; = <span class="fn">listOf</span>(
+        <span class="cls">Workout</span>(<span class="num">1</span>, <span class="str">"Утренняя пробежка"</span>, <span class="cls">WorkoutType</span>.CARDIO,
+            <span class="num">30</span>, <span class="num">280</span>, <span class="fn">listOf</span>(
+                <span class="cls">Exercise</span>(<span class="str">"Разминка"</span>, <span class="num">1</span>, <span class="num">1</span>, <span class="num">0.0</span>, <span class="num">0</span>, <span class="str">"Всё тело"</span>),
+                <span class="cls">Exercise</span>(<span class="str">"Бег 5 км"</span>, <span class="num">1</span>, <span class="num">1</span>, <span class="num">0.0</span>, <span class="num">0</span>, <span class="str">"Ноги"</span>),
+                <span class="cls">Exercise</span>(<span class="str">"Заминка"</span>, <span class="num">1</span>, <span class="num">1</span>, <span class="num">0.0</span>, <span class="num">0</span>, <span class="str">"Всё тело"</span>)
+            ), <span class="str">"2024-12-20"</span>, <span class="cls">Difficulty</span>.EASY, R.drawable.ic_run),
+
+        <span class="cls">Workout</span>(<span class="num">2</span>, <span class="str">"Силовая: верх тела"</span>, <span class="cls">WorkoutType</span>.STRENGTH,
+            <span class="num">45</span>, <span class="num">380</span>, <span class="fn">listOf</span>(
+                <span class="cls">Exercise</span>(<span class="str">"Жим лёжа"</span>, <span class="num">4</span>, <span class="num">10</span>, <span class="num">60.0</span>, <span class="num">90</span>, <span class="str">"Грудь"</span>),
+                <span class="cls">Exercise</span>(<span class="str">"Тяга в наклоне"</span>, <span class="num">4</span>, <span class="num">10</span>, <span class="num">50.0</span>, <span class="num">90</span>, <span class="str">"Спина"</span>),
+                <span class="cls">Exercise</span>(<span class="str">"Жим стоя"</span>, <span class="num">3</span>, <span class="num">12</span>, <span class="num">30.0</span>, <span class="num">60</span>, <span class="str">"Плечи"</span>),
+                <span class="cls">Exercise</span>(<span class="str">"Сгибания на бицепс"</span>, <span class="num">3</span>, <span class="num">12</span>, <span class="num">14.0</span>, <span class="num">60</span>, <span class="str">"Руки"</span>),
+                <span class="cls">Exercise</span>(<span class="str">"Французский жим"</span>, <span class="num">3</span>, <span class="num">12</span>, <span class="num">20.0</span>, <span class="num">60</span>, <span class="str">"Руки"</span>)
+            ), <span class="str">"2024-12-19"</span>, <span class="cls">Difficulty</span>.HARD, R.drawable.ic_strength),
+
+        <span class="cls">Workout</span>(<span class="num">3</span>, <span class="str">"Йога: баланс"</span>, <span class="cls">WorkoutType</span>.YOGA,
+            <span class="num">40</span>, <span class="num">180</span>, <span class="fn">listOf</span>(
+                <span class="cls">Exercise</span>(<span class="str">"Поза дерева"</span>, <span class="num">3</span>, <span class="num">1</span>, <span class="num">0.0</span>, <span class="num">30</span>, <span class="str">"Баланс"</span>),
+                <span class="cls">Exercise</span>(<span class="str">"Воин I"</span>, <span class="num">3</span>, <span class="num">1</span>, <span class="num">0.0</span>, <span class="num">30</span>, <span class="str">"Ноги"</span>),
+                <span class="cls">Exercise</span>(<span class="str">"Воин II"</span>, <span class="num">3</span>, <span class="num">1</span>, <span class="num">0.0</span>, <span class="num">30</span>, <span class="str">"Ноги"</span>),
+                <span class="cls">Exercise</span>(<span class="str">"Планка"</span>, <span class="num">3</span>, <span class="num">1</span>, <span class="num">0.0</span>, <span class="num">30</span>, <span class="str">"Кор"</span>)
+            ), <span class="str">"2024-12-18"</span>, <span class="cls">Difficulty</span>.EASY, R.drawable.ic_yoga),
+
+        <span class="cls">Workout</span>(<span class="num">4</span>, <span class="str">"HIIT: жиросжигание"</span>, <span class="cls">WorkoutType</span>.HIIT,
+            <span class="num">25</span>, <span class="num">420</span>, <span class="fn">listOf</span>(
+                <span class="cls">Exercise</span>(<span class="str">"Бёрпи"</span>, <span class="num">4</span>, <span class="num">15</span>, <span class="num">0.0</span>, <span class="num">30</span>, <span class="str">"Всё тело"</span>),
+                <span class="cls">Exercise</span>(<span class="str">"Прыжки"</span>, <span class="num">4</span>, <span class="num">20</span>, <span class="num">0.0</span>, <span class="num">30</span>, <span class="str">"Ноги"</span>),
+                <span class="cls">Exercise</span>(<span class="str">"Отжимания"</span>, <span class="num">4</span>, <span class="num">12</span>, <span class="num">0.0</span>, <span class="num">30</span>, <span class="str">"Грудь"</span>),
+                <span class="cls">Exercise</span>(<span class="str">"Скалолаз"</span>, <span class="num">4</span>, <span class="num">20</span>, <span class="num">0.0</span>, <span class="num">30</span>, <span class="str">"Кор"</span>)
+            ), <span class="str">"2024-12-17"</span>, <span class="cls">Difficulty</span>.HARD, R.drawable.ic_hiit),
+
+        <span class="cls">Workout</span>(<span class="num">5</span>, <span class="str">"Растяжка: всё тело"</span>, <span class="cls">WorkoutType</span>.STRETCHING,
+            <span class="num">20</span>, <span class="num">90</span>, <span class="fn">listOf</span>(
+                <span class="cls">Exercise</span>(<span class="str">"Наклоны"</span>, <span class="num">2</span>, <span class="num">1</span>, <span class="num">0.0</span>, <span class="num">20</span>, <span class="str">"Спина"</span>),
+                <span class="cls">Exercise</span>(<span class="str">"Бабочка"</span>, <span class="num">2</span>, <span class="num">1</span>, <span class="num">0.0</span>, <span class="num">20</span>, <span class="str">"Ноги"</span>),
+                <span class="cls">Exercise</span>(<span class="str">"Кошка-корова"</span>, <span class="num">2</span>, <span class="num">1</span>, <span class="num">0.0</span>, <span class="num">20</span>, <span class="str">"Спина"</span>)
+            ), <span class="str">"2024-12-16"</span>, <span class="cls">Difficulty</span>.EASY, R.drawable.ic_stretch),
+
+        <span class="cls">Workout</span>(<span class="num">6</span>, <span class="str">"Силовая: ноги"</span>, <span class="cls">WorkoutType</span>.STRENGTH,
+            <span class="num">50</span>, <span class="num">450</span>, <span class="fn">listOf</span>(
+                <span class="cls">Exercise</span>(<span class="str">"Приседания"</span>, <span class="num">4</span>, <span class="num">12</span>, <span class="num">80.0</span>, <span class="num">120</span>, <span class="str">"Ноги"</span>),
+                <span class="cls">Exercise</span>(<span class="str">"Жим ногами"</span>, <span class="num">4</span>, <span class="num">12</span>, <span class="num">120.0</span>, <span class="num">90</span>, <span class="str">"Ноги"</span>),
+                <span class="cls">Exercise</span>(<span class="str">"Выпады"</span>, <span class="num">3</span>, <span class="num">10</span>, <span class="num">20.0</span>, <span class="num">60</span>, <span class="str">"Ноги"</span>),
+                <span class="cls">Exercise</span>(<span class="str">"Подъёмы на носки"</span>, <span class="num">4</span>, <span class="num">15</span>, <span class="num">40.0</span>, <span class="num">60</span>, <span class="str">"Ноги"</span>)
+            ), <span class="str">"2024-12-15"</span>, <span class="cls">Difficulty</span>.HARD, R.drawable.ic_strength)
+    )
+
+    <span class="kw">fun</span> <span class="fn">getById</span>(id: <span class="cls">Int</span>): <span class="cls">Workout</span>? =
+        workouts.value?.<span class="fn">find</span> { it.id == id }
+
+    <span class="kw">fun</span> <span class="fn">getByType</span>(type: <span class="cls">WorkoutType</span>): <span class="cls">List</span>&lt;<span class="cls">Workout</span>&gt; =
+        workouts.value?.<span class="fn">filter</span> { it.type == type } ?: <span class="fn">emptyList</span>()
+
+    <span class="kw">fun</span> <span class="fn">completeWorkout</span>(id: <span class="cls">Int</span>) {
+        <span class="kw">val</span> list = workouts.value ?: <span class="kw">return</span>
+        <span class="kw">val</span> w = list.<span class="fn">find</span> { it.id == id } ?: <span class="kw">return</span>
+        w.isCompleted = <span class="kw">true</span>
+        workouts.value = list <span class="cmt">// триггер LiveData</span>
+
+        <span class="cmt">// Обновляем статистику</span>
+        todayCalories.value = (todayCalories.value ?: <span class="num">0</span>) + w.calories
+        todayMinutes.value = (todayMinutes.value ?: <span class="num">0</span>) + w.durationMin
+        weeklyWorkouts.value = (weeklyWorkouts.value ?: <span class="num">0</span>) + <span class="num">1</span>
+    }
+
+    <span class="kw">fun</span> <span class="fn">getTotalCalories</span>(): <span class="cls">Int</span> =
+        workouts.value?.<span class="fn">filter</span> { it.isCompleted }?.<span class="fn">sumOf</span> { it.calories } ?: <span class="num">0</span>
+
+    <span class="kw">fun</span> <span class="fn">getCompletedCount</span>(): <span class="cls">Int</span> =
+        workouts.value?.<span class="fn">count</span> { it.isCompleted } ?: <span class="num">0</span>
+
+    <span class="cmt">// Данные для графика (последние 7 дней)</span>
+    <span class="kw">fun</span> <span class="fn">getWeeklyData</span>(): <span class="cls">List</span>&lt;<span class="cls">Pair</span>&lt;<span class="cls">String</span>, <span class="cls">Int</span>&gt;&gt; = <span class="fn">listOf</span>(
+        <span class="str">"Пн"</span> <span class="kw">to</span> <span class="num">320</span>, <span class="str">"Вт"</span> <span class="kw">to</span> <span class="num">0</span>, <span class="str">"Ср"</span> <span class="kw">to</span> <span class="num">450</span>,
+        <span class="str">"Чт"</span> <span class="kw">to</span> <span class="num">280</span>, <span class="str">"Пт"</span> <span class="kw">to</span> <span class="num">0</span>, <span class="str">"Сб"</span> <span class="kw">to</span> <span class="num">520</span>,
+        <span class="str">"Вс"</span> <span class="kw">to</span> (todayCalories.value ?: <span class="num">0</span>)
+    )
+
+    <span class="kw">fun</span> <span class="fn">resetStats</span>() {
+        todayCalories.value = <span class="num">0</span>
+        todaySteps.value = <span class="num">6540</span>
+        todayMinutes.value = <span class="num">0</span>
+        weeklyWorkouts.value = <span class="num">0</span>
+        workouts.value = <span class="fn">getDefaultWorkouts</span>().<span class="fn">toMutableList</span>()
+    }
+}</code></pre></div>
+                </div>
+
+                <div class="explain">
+                    <h4>🔍 Ключевые паттерны</h4>
+                    <ul>
+                        <li><code>MutableLiveData</code> с начальным значением — при подписке observer сразу получит текущее значение.</li>
+                        <li><code>workouts.value = list</code> — обязательное присвоение для триггера обновления. Мутация содержимого списка без присвоения <strong>не триггерит</strong> observer.</li>
+                        <li><code>completeWorkout()</code> — обновляет и тренировку, и все связанные метрики атомарно.</li>
+                        <li><code>getWeeklyData()</code> — возвращает пары «день→калории» для графика.</li>
+                    </ul>
+                </div>
+            </div></div>
+        </div>
+
+        <label class="check"><input type="checkbox" onchange="updateProgress()"><span class="check-box"></span><span class="check-label">FitRepository.kt создан</span></label>
+    </div>
+</section>
+
+<!-- ======================== PART 3 ======================== -->
+<div class="part"><h2><span class="part-num">3</span> Ресурсы</h2></div>
+
+<section class="step" id="s8"><div class="step-head"><div class="step-num">8</div><div><h2>Цвета и тема</h2><div class="step-sub">Зелёно-фиолетовая палитра для фитнес-стиля</div></div></div><div class="step-body">
+    <div class="coll"><div class="coll-head" onclick="toggleColl(this)"><span class="coll-arrow">▶</span> 🎨 res/values/colors.xml</div><div class="coll-body"><div class="coll-inner">
+        <div class="code"><div class="code-top"><span class="code-name">colors.xml</span><div class="code-right"><span class="lang-badge lang-xml">XML</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div></div><div class="code-body"><pre><code><span class="tag">&lt;resources&gt;</span>
+    <span class="tag">&lt;color</span> <span class="atn">name</span>=<span class="atv">"primary"</span><span class="tag">&gt;</span>#10B981<span class="tag">&lt;/color&gt;</span>
+    <span class="tag">&lt;color</span> <span class="atn">name</span>=<span class="atv">"primary_dark"</span><span class="tag">&gt;</span>#059669<span class="tag">&lt;/color&gt;</span>
+    <span class="tag">&lt;color</span> <span class="atn">name</span>=<span class="atv">"primary_light"</span><span class="tag">&gt;</span>#34D399<span class="tag">&lt;/color&gt;</span>
+    <span class="tag">&lt;color</span> <span class="atn">name</span>=<span class="atv">"accent"</span><span class="tag">&gt;</span>#6366F1<span class="tag">&lt;/color&gt;</span>
+    <span class="tag">&lt;color</span> <span class="atn">name</span>=<span class="atv">"accent_light"</span><span class="tag">&gt;</span>#818CF8<span class="tag">&lt;/color&gt;</span>
+    <span class="tag">&lt;color</span> <span class="atn">name</span>=<span class="atv">"bg"</span><span class="tag">&gt;</span>#F0FDF4<span class="tag">&lt;/color&gt;</span>
+    <span class="tag">&lt;color</span> <span class="atn">name</span>=<span class="atv">"surface"</span><span class="tag">&gt;</span>#FFFFFF<span class="tag">&lt;/color&gt;</span>
+    <span class="tag">&lt;color</span> <span class="atn">name</span>=<span class="atv">"card_bg"</span><span class="tag">&gt;</span>#FFFFFF<span class="tag">&lt;/color&gt;</span>
+    <span class="tag">&lt;color</span> <span class="atn">name</span>=<span class="atv">"text_primary"</span><span class="tag">&gt;</span>#111827<span class="tag">&lt;/color&gt;</span>
+    <span class="tag">&lt;color</span> <span class="atn">name</span>=<span class="atv">"text_secondary"</span><span class="tag">&gt;</span>#6B7280<span class="tag">&lt;/color&gt;</span>
+    <span class="tag">&lt;color</span> <span class="atn">name</span>=<span class="atv">"text_hint"</span><span class="tag">&gt;</span>#9CA3AF<span class="tag">&lt;/color&gt;</span>
+    <span class="tag">&lt;color</span> <span class="atn">name</span>=<span class="atv">"text_on_primary"</span><span class="tag">&gt;</span>#FFFFFF<span class="tag">&lt;/color&gt;</span>
+    <span class="tag">&lt;color</span> <span class="atn">name</span>=<span class="atv">"divider"</span><span class="tag">&gt;</span>#E5E7EB<span class="tag">&lt;/color&gt;</span>
+    <span class="tag">&lt;color</span> <span class="atn">name</span>=<span class="atv">"error"</span><span class="tag">&gt;</span>#EF4444<span class="tag">&lt;/color&gt;</span>
+    <span class="tag">&lt;color</span> <span class="atn">name</span>=<span class="atv">"success"</span><span class="tag">&gt;</span>#10B981<span class="tag">&lt;/color&gt;</span>
+    <span class="tag">&lt;color</span> <span class="atn">name</span>=<span class="atv">"warning"</span><span class="tag">&gt;</span>#F59E0B<span class="tag">&lt;/color&gt;</span>
+    <span class="tag">&lt;color</span> <span class="atn">name</span>=<span class="atv">"cardio_color"</span><span class="tag">&gt;</span>#EF4444<span class="tag">&lt;/color&gt;</span>
+    <span class="tag">&lt;color</span> <span class="atn">name</span>=<span class="atv">"strength_color"</span><span class="tag">&gt;</span>#3B82F6<span class="tag">&lt;/color&gt;</span>
+    <span class="tag">&lt;color</span> <span class="atn">name</span>=<span class="atv">"yoga_color"</span><span class="tag">&gt;</span>#A855F7<span class="tag">&lt;/color&gt;</span>
+    <span class="tag">&lt;color</span> <span class="atn">name</span>=<span class="atv">"hiit_color"</span><span class="tag">&gt;</span>#F59E0B<span class="tag">&lt;/color&gt;</span>
+    <span class="tag">&lt;color</span> <span class="atn">name</span>=<span class="atv">"stretch_color"</span><span class="tag">&gt;</span>#06B6D4<span class="tag">&lt;/color&gt;</span>
+    <span class="tag">&lt;color</span> <span class="atn">name</span>=<span class="atv">"black"</span><span class="tag">&gt;</span>#000000<span class="tag">&lt;/color&gt;</span>
+    <span class="tag">&lt;color</span> <span class="atn">name</span>=<span class="atv">"white"</span><span class="tag">&gt;</span>#FFFFFF<span class="tag">&lt;/color&gt;</span>
+<span class="tag">&lt;/resources&gt;</span></code></pre></div></div>
+        <div class="explain"><h4>🔍 Цвета по типам тренировок</h4><p>Каждый тип тренировки имеет свой цвет: кардио — красный (сердце), силовая — синий (железо), йога — фиолетовый (спокойствие), HIIT — жёлтый (энергия). Это улучшает визуальное различение карточек.</p></div>
+    </div></div></div>
+
+    <div class="coll"><div class="coll-head" onclick="toggleColl(this)"><span class="coll-arrow">▶</span> 🎨 res/values/themes.xml</div><div class="coll-body"><div class="coll-inner">
+        <div class="code"><div class="code-top"><span class="code-name">themes.xml</span><div class="code-right"><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div></div><div class="code-body"><pre><code><span class="tag">&lt;resources&gt;</span>
+    <span class="tag">&lt;style</span> <span class="atn">name</span>=<span class="atv">"Theme.FitTracker"</span>
+        <span class="atn">parent</span>=<span class="atv">"Theme.MaterialComponents.Light.NoActionBar"</span><span class="tag">&gt;</span>
+        <span class="tag">&lt;item</span> <span class="atn">name</span>=<span class="atv">"colorPrimary"</span><span class="tag">&gt;</span>@color/primary<span class="tag">&lt;/item&gt;</span>
+        <span class="tag">&lt;item</span> <span class="atn">name</span>=<span class="atv">"colorPrimaryDark"</span><span class="tag">&gt;</span>@color/primary_dark<span class="tag">&lt;/item&gt;</span>
+        <span class="tag">&lt;item</span> <span class="atn">name</span>=<span class="atv">"colorAccent"</span><span class="tag">&gt;</span>@color/accent<span class="tag">&lt;/item&gt;</span>
+        <span class="tag">&lt;item</span> <span class="atn">name</span>=<span class="atv">"android:windowBackground"</span><span class="tag">&gt;</span>@color/bg<span class="tag">&lt;/item&gt;</span>
+        <span class="tag">&lt;item</span> <span class="atn">name</span>=<span class="atv">"android:statusBarColor"</span><span class="tag">&gt;</span>@color/primary_dark<span class="tag">&lt;/item&gt;</span>
+    <span class="tag">&lt;/style&gt;</span>
+    <span class="tag">&lt;style</span> <span class="atn">name</span>=<span class="atv">"RoundedImage"</span> <span class="atn">parent</span>=<span class="atv">""</span><span class="tag">&gt;</span>
+        <span class="tag">&lt;item</span> <span class="atn">name</span>=<span class="atv">"cornerFamily"</span><span class="tag">&gt;</span>rounded<span class="tag">&lt;/item&gt;</span>
+        <span class="tag">&lt;item</span> <span class="atn">name</span>=<span class="atv">"cornerSize"</span><span class="tag">&gt;</span>12dp<span class="tag">&lt;/item&gt;</span>
+    <span class="tag">&lt;/style&gt;</span>
+<span class="tag">&lt;/resources&gt;</span></code></pre></div></div>
+    </div></div></div>
+    <label class="check"><input type="checkbox" onchange="updateProgress()"><span class="check-box"></span><span class="check-label">Цвета и тема настроены</span></label>
+</div></section>
+
+<!-- Steps 9-11 (Resources) -->
+<section class="step" id="s9"><div class="step-head"><div class="step-num">9</div><div><h2>Строки и размеры</h2><div class="step-sub">strings.xml и dimens.xml с фитнес-терминологией</div></div></div><div class="step-body">
+    <p>Все тексты приложения: заголовки экранов, метки кнопок, единицы измерения (ккал, мин, шагов, подходов×повторений). Файл <code>dimens.xml</code> содержит стандартные отступы и размеры текста.</p>
+    <div class="callout c-info"><span class="callout-icon">📐</span><div>Используйте систему <code>spacing_xs/sm/md/lg/xl</code> (4/8/16/24/32dp) для единообразных отступов.</div></div>
+    <label class="check"><input type="checkbox" onchange="updateProgress()"><span class="check-box"></span><span class="check-label">Строки и размеры добавлены</span></label>
+</div></section>
+
+<section class="step" id="s10"><div class="step-head"><div class="step-num">10</div><div><h2>Drawable-ресурсы</h2><div class="step-sub">Фоны кнопок, карточек, прогресс-бары</div></div></div><div class="step-body">
+    <p>Создайте XML-shape файлы аналогично FoodExpress:</p>
+    <ul>
+        <li><code>bg_button_primary.xml</code> — зелёная кнопка с скруглением 12dp</li>
+        <li><code>bg_edit_text.xml</code> — поле ввода с обводкой</li>
+        <li><code>bg_card.xml</code> — белая карточка с тенью</li>
+        <li><code>bg_stat_card.xml</code> — карточка статистики с лёгким градиентом</li>
+        <li><code>bg_progress_circle.xml</code> — кольцо прогресса (ring shape)</li>
+        <li><code>bg_type_badge.xml</code> — бейдж типа тренировки (маленький скруглённый)</li>
+        <li><code>bg_difficulty_*.xml</code> — цветные индикаторы сложности (зелёный/жёлтый/красный)</li>
+    </ul>
+
+    <div class="coll"><div class="coll-head" onclick="toggleColl(this)"><span class="coll-arrow">▶</span> Пример: bg_stat_card.xml — карточка дашборда</div><div class="coll-body"><div class="coll-inner">
+        <div class="code"><div class="code-top"><span class="code-name">bg_stat_card.xml</span><div class="code-right"><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div></div><div class="code-body"><pre><code><span class="tag">&lt;shape</span> <span class="atn">xmlns:android</span>=<span class="atv">"http://schemas.android.com/apk/res/android"</span>
+    <span class="atn">android:shape</span>=<span class="atv">"rectangle"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;gradient</span>
+        <span class="atn">android:startColor</span>=<span class="atv">"#10B981"</span>
+        <span class="atn">android:endColor</span>=<span class="atv">"#059669"</span>
+        <span class="atn">android:angle</span>=<span class="atv">"135"</span> <span class="tag">/&gt;</span>
+    <span class="tag">&lt;corners</span> <span class="atn">android:radius</span>=<span class="atv">"16dp"</span> <span class="tag">/&gt;</span>
+<span class="tag">&lt;/shape&gt;</span></code></pre></div></div>
+    </div></div></div>
+    <label class="check"><input type="checkbox" onchange="updateProgress()"><span class="check-box"></span><span class="check-label">Drawable-ресурсы созданы</span></label>
+</div></section>
+
+<section class="step" id="s11"><div class="step-head"><div class="step-num">11</div><div><h2>Векторные иконки</h2><div class="step-sub">Иконки для навигации и типов тренировок</div></div></div><div class="step-body">
+    <p>Создайте в <code>drawable/</code> следующие иконки (Vector Asset или вручную XML):</p>
+    <div class="tbl"><table>
+        <tr><th>Файл</th><th>Назначение</th><th>Источник (Clip Art)</th></tr>
+        <tr><td><code>ic_dashboard.xml</code></td><td>Вкладка «Дашборд»</td><td>dashboard</td></tr>
+        <tr><td><code>ic_fitness.xml</code></td><td>Вкладка «Тренировки»</td><td>fitness_center</td></tr>
+        <tr><td><code>ic_stats.xml</code></td><td>Вкладка «Статистика»</td><td>bar_chart</td></tr>
+        <tr><td><code>ic_person.xml</code></td><td>Вкладка «Профиль»</td><td>person</td></tr>
+        <tr><td><code>ic_run.xml</code></td><td>Кардио</td><td>directions_run</td></tr>
+        <tr><td><code>ic_strength.xml</code></td><td>Силовая</td><td>fitness_center</td></tr>
+        <tr><td><code>ic_yoga.xml</code></td><td>Йога</td><td>self_improvement</td></tr>
+        <tr><td><code>ic_hiit.xml</code></td><td>HIIT</td><td>flash_on</td></tr>
+        <tr><td><code>ic_stretch.xml</code></td><td>Растяжка</td><td>accessibility</td></tr>
+        <tr><td><code>ic_fire.xml</code></td><td>Калории</td><td>local_fire_department</td></tr>
+        <tr><td><code>ic_timer.xml</code></td><td>Длительность</td><td>timer</td></tr>
+        <tr><td><code>ic_steps.xml</code></td><td>Шаги</td><td>directions_walk</td></tr>
+        <tr><td><code>ic_check.xml</code></td><td>Выполнено</td><td>check_circle</td></tr>
+        <tr><td><code>ic_arrow_back.xml</code></td><td>Назад</td><td>arrow_back</td></tr>
+        <tr><td><code>ic_play.xml</code></td><td>Начать тренировку</td><td>play_arrow</td></tr>
+    </table></div>
+    <label class="check"><input type="checkbox" onchange="updateProgress()"><span class="check-box"></span><span class="check-label">Все иконки созданы</span></label>
+</div></section>
+
+<!-- ======================== PART 4 ======================== -->
+<div class="part"><h2><span class="part-num">4</span> Навигация</h2></div>
+
+<section class="step" id="s12"><div class="step-head"><div class="step-num">12</div><div><h2>Меню нижней навигации</h2><div class="step-sub">4 вкладки: Дашборд, Тренировки, Статистика, Профиль</div></div></div><div class="step-body">
+    <div class="code"><div class="code-top"><span class="code-name">res/menu/bottom_nav_menu.xml</span><div class="code-right"><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div></div><div class="code-body"><pre><code><span class="tag">&lt;menu</span> <span class="atn">xmlns:android</span>=<span class="atv">"http://schemas.android.com/apk/res/android"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;item</span> <span class="atn">android:id</span>=<span class="atv">"@+id/dashboardFragment"</span>
+        <span class="atn">android:icon</span>=<span class="atv">"@drawable/ic_dashboard"</span>
+        <span class="atn">android:title</span>=<span class="atv">"Дашборд"</span> <span class="tag">/&gt;</span>
+    <span class="tag">&lt;item</span> <span class="atn">android:id</span>=<span class="atv">"@+id/workoutsFragment"</span>
+        <span class="atn">android:icon</span>=<span class="atv">"@drawable/ic_fitness"</span>
+        <span class="atn">android:title</span>=<span class="atv">"Тренировки"</span> <span class="tag">/&gt;</span>
+    <span class="tag">&lt;item</span> <span class="atn">android:id</span>=<span class="atv">"@+id/statsFragment"</span>
+        <span class="atn">android:icon</span>=<span class="atv">"@drawable/ic_stats"</span>
+        <span class="atn">android:title</span>=<span class="atv">"Статистика"</span> <span class="tag">/&gt;</span>
+    <span class="tag">&lt;item</span> <span class="atn">android:id</span>=<span class="atv">"@+id/profileFragment"</span>
+        <span class="atn">android:icon</span>=<span class="atv">"@drawable/ic_person"</span>
+        <span class="atn">android:title</span>=<span class="atv">"Профиль"</span> <span class="tag">/&gt;</span>
+<span class="tag">&lt;/menu&gt;</span></code></pre></div></div>
+    <label class="check"><input type="checkbox" onchange="updateProgress()"><span class="check-box"></span><span class="check-label">Меню создано</span></label>
+</div></section>
+
+<section class="step" id="s13"><div class="step-head"><div class="step-num">13</div><div><h2>Navigation Graphs</h2><div class="step-sub">Два графа: основной (auth → main → detail) и вложенный (tabs)</div></div></div><div class="step-body">
+    <div class="callout c-accent2"><span class="callout-icon">🧭</span><div><strong>Архитектура навигации FitTracker:</strong><br>
+    • <code>nav_graph.xml</code>: LoginFragment → RegisterFragment → MainFragment → WorkoutDetailFragment<br>
+    • <code>nav_main.xml</code>: DashboardFragment, WorkoutsFragment, StatsFragment, ProfileFragment (вкладки)</div></div>
+
+    <div class="coll"><div class="coll-head" onclick="toggleColl(this)"><span class="coll-arrow">▶</span> 📄 nav_graph.xml — основной</div><div class="coll-body"><div class="coll-inner">
+        <div class="code"><div class="code-top"><span class="code-name">nav_graph.xml</span><div class="code-right"><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div></div><div class="code-body"><pre><code><span class="tag">&lt;navigation</span> <span class="atn">xmlns:android</span>=<span class="atv">"http://schemas.android.com/apk/res/android"</span>
+    <span class="atn">xmlns:app</span>=<span class="atv">"http://schemas.android.com/apk/res-auto"</span>
+    <span class="atn">android:id</span>=<span class="atv">"@+id/nav_graph"</span>
+    <span class="atn">app:startDestination</span>=<span class="atv">"@id/loginFragment"</span><span class="tag">&gt;</span>
+
+    <span class="tag">&lt;fragment</span> <span class="atn">android:id</span>=<span class="atv">"@+id/loginFragment"</span>
+        <span class="atn">android:name</span>=<span class="atv">"com.example.fittracker.ui.auth.LoginFragment"</span><span class="tag">&gt;</span>
+        <span class="tag">&lt;action</span> <span class="atn">android:id</span>=<span class="atv">"@+id/action_login_to_register"</span>
+            <span class="atn">app:destination</span>=<span class="atv">"@id/registerFragment"</span> <span class="tag">/&gt;</span>
+        <span class="tag">&lt;action</span> <span class="atn">android:id</span>=<span class="atv">"@+id/action_login_to_main"</span>
+            <span class="atn">app:destination</span>=<span class="atv">"@id/mainFragment"</span>
+            <span class="atn">app:popUpTo</span>=<span class="atv">"@id/loginFragment"</span>
+            <span class="atn">app:popUpToInclusive</span>=<span class="atv">"true"</span> <span class="tag">/&gt;</span>
+    <span class="tag">&lt;/fragment&gt;</span>
+
+    <span class="tag">&lt;fragment</span> <span class="atn">android:id</span>=<span class="atv">"@+id/registerFragment"</span>
+        <span class="atn">android:name</span>=<span class="atv">"com.example.fittracker.ui.auth.RegisterFragment"</span><span class="tag">&gt;</span>
+        <span class="tag">&lt;action</span> <span class="atn">android:id</span>=<span class="atv">"@+id/action_register_to_main"</span>
+            <span class="atn">app:destination</span>=<span class="atv">"@id/mainFragment"</span>
+            <span class="atn">app:popUpTo</span>=<span class="atv">"@id/loginFragment"</span>
+            <span class="atn">app:popUpToInclusive</span>=<span class="atv">"true"</span> <span class="tag">/&gt;</span>
+        <span class="tag">&lt;action</span> <span class="atn">android:id</span>=<span class="atv">"@+id/action_register_to_login"</span>
+            <span class="atn">app:destination</span>=<span class="atv">"@id/loginFragment"</span>
+            <span class="atn">app:popUpTo</span>=<span class="atv">"@id/loginFragment"</span>
+            <span class="atn">app:popUpToInclusive</span>=<span class="atv">"true"</span> <span class="tag">/&gt;</span>
+    <span class="tag">&lt;/fragment&gt;</span>
+
+    <span class="tag">&lt;fragment</span> <span class="atn">android:id</span>=<span class="atv">"@+id/mainFragment"</span>
+        <span class="atn">android:name</span>=<span class="atv">"com.example.fittracker.ui.MainFragment"</span><span class="tag">&gt;</span>
+        <span class="tag">&lt;action</span> <span class="atn">android:id</span>=<span class="atv">"@+id/action_main_to_detail"</span>
+            <span class="atn">app:destination</span>=<span class="atv">"@id/workoutDetailFragment"</span> <span class="tag">/&gt;</span>
+        <span class="tag">&lt;action</span> <span class="atn">android:id</span>=<span class="atv">"@+id/action_main_to_login"</span>
+            <span class="atn">app:destination</span>=<span class="atv">"@id/loginFragment"</span>
+            <span class="atn">app:popUpTo</span>=<span class="atv">"@id/nav_graph"</span>
+            <span class="atn">app:popUpToInclusive</span>=<span class="atv">"true"</span> <span class="tag">/&gt;</span>
+    <span class="tag">&lt;/fragment&gt;</span>
+
+    <span class="tag">&lt;fragment</span> <span class="atn">android:id</span>=<span class="atv">"@+id/workoutDetailFragment"</span>
+        <span class="atn">android:name</span>=<span class="atv">"com.example.fittracker.ui.detail.WorkoutDetailFragment"</span><span class="tag">&gt;</span>
+        <span class="tag">&lt;argument</span> <span class="atn">android:name</span>=<span class="atv">"workoutId"</span> <span class="atn">app:argType</span>=<span class="atv">"integer"</span> <span class="tag">/&gt;</span>
+    <span class="tag">&lt;/fragment&gt;</span>
+<span class="tag">&lt;/navigation&gt;</span></code></pre></div></div>
+    </div></div></div>
+
+    <div class="coll"><div class="coll-head" onclick="toggleColl(this)"><span class="coll-arrow">▶</span> 📄 nav_main.xml — вкладки</div><div class="coll-body"><div class="coll-inner">
+        <div class="code"><div class="code-top"><span class="code-name">nav_main.xml</span><div class="code-right"><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div></div><div class="code-body"><pre><code><span class="tag">&lt;navigation</span> <span class="atn">xmlns:android</span>=<span class="atv">"http://schemas.android.com/apk/res/android"</span>
+    <span class="atn">xmlns:app</span>=<span class="atv">"http://schemas.android.com/apk/res-auto"</span>
+    <span class="atn">android:id</span>=<span class="atv">"@+id/nav_main"</span>
+    <span class="atn">app:startDestination</span>=<span class="atv">"@id/dashboardFragment"</span><span class="tag">&gt;</span>
+
+    <span class="tag">&lt;fragment</span> <span class="atn">android:id</span>=<span class="atv">"@+id/dashboardFragment"</span>
+        <span class="atn">android:name</span>=<span class="atv">"com.example.fittracker.ui.dashboard.DashboardFragment"</span> <span class="tag">/&gt;</span>
+    <span class="tag">&lt;fragment</span> <span class="atn">android:id</span>=<span class="atv">"@+id/workoutsFragment"</span>
+        <span class="atn">android:name</span>=<span class="atv">"com.example.fittracker.ui.workouts.WorkoutsFragment"</span> <span class="tag">/&gt;</span>
+    <span class="tag">&lt;fragment</span> <span class="atn">android:id</span>=<span class="atv">"@+id/statsFragment"</span>
+        <span class="atn">android:name</span>=<span class="atv">"com.example.fittracker.ui.stats.StatsFragment"</span> <span class="tag">/&gt;</span>
+    <span class="tag">&lt;fragment</span> <span class="atn">android:id</span>=<span class="atv">"@+id/profileFragment"</span>
+        <span class="atn">android:name</span>=<span class="atv">"com.example.fittracker.ui.profile.ProfileFragment"</span> <span class="tag">/&gt;</span>
+<span class="tag">&lt;/navigation&gt;</span></code></pre></div></div>
+    </div></div></div>
+    <label class="check"><input type="checkbox" onchange="updateProgress()"><span class="check-box"></span><span class="check-label">Навигация настроена</span></label>
+</div></section>
+
+<!-- ======================== PART 5 ======================== -->
+<div class="part"><h2><span class="part-num">5</span> Макеты (Layouts)</h2></div>
+
+<!-- Steps 14-19 -->
+<section class="step" id="s14"><div class="step-head"><div class="step-num">14</div><div><h2>Activity и экраны авторизации</h2><div class="step-sub">activity_main.xml, fragment_login.xml, fragment_register.xml</div></div></div><div class="step-body">
+    <div class="explain"><h4>🔍 Экран логина FitTracker</h4><ul>
+        <li>Эмодзи 💪 и название приложения с градиентным текстом</li>
+        <li>Подзаголовок «Отслеживайте прогресс тренировок»</li>
+        <li>Поля Email и Пароль с валидацией</li>
+        <li>Кнопка «Войти» с зелёным фоном</li>
+        <li>Ссылка «Нет аккаунта? → Регистрация»</li>
+        <li>Регистрация добавляет поля: Имя, Возраст, Вес, Рост</li>
+    </ul></div>
+    <label class="check"><input type="checkbox" onchange="updateProgress()"><span class="check-box"></span><span class="check-label">Auth-макеты созданы</span></label>
+</div></section>
+
+<section class="step" id="s15"><div class="step-head"><div class="step-num">15</div><div><h2>Main и Dashboard</h2><div class="step-sub">Главный контейнер и экран дашборда с прогрессом</div></div></div><div class="step-body">
+    <div class="callout c-accent"><span class="callout-icon">📊</span><div><strong>Дашборд — самый информативный экран:</strong><br>
+    • Приветствие «Привет, Имя! 👋»<br>
+    • 3 карточки прогресса: Калории, Шаги, Минуты тренировок (каждая с ProgressBar)<br>
+    • Секция «Сегодняшние тренировки» — горизонтальный RecyclerView<br>
+    • Секция «Быстрый старт» — кнопки по типам тренировок</div></div>
+
+    <div class="explain"><h4>🔍 ProgressBar для метрик</h4><p>Для круговых индикаторов используем <code>ProgressBar</code> со стилем <code>?android:attr/progressBarStyleHorizontal</code> и <code>android:progressDrawable</code> с custom drawable. Прогресс рассчитывается: <code>(current / goal * 100)</code>.</p></div>
+    <label class="check"><input type="checkbox" onchange="updateProgress()"><span class="check-box"></span><span class="check-label">Dashboard layout создан</span></label>
+</div></section>
+
+<section class="step" id="s16"><div class="step-head"><div class="step-num">16</div><div><h2>Тренировки и детали</h2><div class="step-sub">fragment_workouts.xml и fragment_workout_detail.xml</div></div></div><div class="step-body">
+    <div class="explain"><h4>🔍 Экран тренировок</h4><ul>
+        <li>Фильтры по типу: «Все», «Кардио 🏃», «Силовая 🏋️», «Йога 🧘», «HIIT ⚡»</li>
+        <li>Список карточек с: иконкой типа, названием, длительностью, калориями, сложностью</li>
+        <li>Цветной бейдж типа тренировки на каждой карточке</li>
+        <li>При нажатии — переход на экран деталей</li>
+    </ul></div>
+    <div class="explain"><h4>🔍 Экран деталей тренировки</h4><ul>
+        <li>Заголовок с иконкой типа и бейджем сложности</li>
+        <li>Метрики: время, калории, кол-во упражнений</li>
+        <li>Список упражнений (RecyclerView): название, подходы×повторения, вес, группа мышц</li>
+        <li>Кнопка «Завершить тренировку» (обновляет статистику)</li>
+    </ul></div>
+    <label class="check"><input type="checkbox" onchange="updateProgress()"><span class="check-box"></span><span class="check-label">Workout layouts созданы</span></label>
+</div></section>
+
+<section class="step" id="s17"><div class="step-head"><div class="step-num">17</div><div><h2>Статистика</h2><div class="step-sub">fragment_stats.xml — графики и итоги</div></div></div><div class="step-body">
+    <div class="callout c-accent2"><span class="callout-icon">📈</span><div><strong>Экран статистики содержит:</strong><br>
+    • Итоговые карточки: всего тренировок, калорий, минут<br>
+    • «График» калорий по дням (горизонтальные столбики из View)<br>
+    • Распределение по типам тренировок (цветные полоски)<br>
+    • BMI-индикатор с категорией</div></div>
+
+    <div class="explain"><h4>🔍 «График» без библиотек</h4><p>Настоящие графики требуют MPAndroidChart или Canvas. Для учебного проекта мы делаем <strong>bar chart из View</strong>: LinearLayout с 7 вертикальными полосками, высота каждой программно задаётся по данным. Просто и наглядно!</p></div>
+    <label class="check"><input type="checkbox" onchange="updateProgress()"><span class="check-box"></span><span class="check-label">Stats layout создан</span></label>
+</div></section>
+
+<section class="step" id="s18"><div class="step-head"><div class="step-num">18</div><div><h2>Профиль</h2><div class="step-sub">fragment_profile.xml — данные, параметры, настройки</div></div></div><div class="step-body">
+    <div class="explain"><h4>🔍 Экран профиля</h4><ul>
+        <li>Шапка с градиентом: аватар (первая буква имени), имя, email</li>
+        <li>Карточка «Мои параметры»: вес, рост, возраст, BMI</li>
+        <li>Карточка «Мои цели»: калории/день, тренировки/неделю, шаги/день</li>
+        <li>Пункты меню: Достижения, История, Настройки, Поддержка</li>
+        <li>Кнопка «Выйти» — возврат на логин</li>
+    </ul></div>
+    <label class="check"><input type="checkbox" onchange="updateProgress()"><span class="check-box"></span><span class="check-label">Profile layout создан</span></label>
+</div></section>
+
+<section class="step" id="s19"><div class="step-head"><div class="step-num">19</div><div><h2>Item-макеты для списков</h2><div class="step-sub">Карточка тренировки, упражнение, фильтр, метрика</div></div></div><div class="step-body">
+    <p>Создайте layout-файлы для элементов RecyclerView:</p>
+    <div class="tbl"><table>
+        <tr><th>Файл</th><th>Где используется</th><th>Содержимое</th></tr>
+        <tr><td><code>item_workout.xml</code></td><td>Список тренировок</td><td>Иконка + название + время + ккал + бейдж типа + сложность</td></tr>
+        <tr><td><code>item_exercise.xml</code></td><td>Детали тренировки</td><td>Название + подходы×повтор + вес + мышечная группа</td></tr>
+        <tr><td><code>item_filter.xml</code></td><td>Фильтры типов</td><td>Текст с фоном (активный = зелёный, неактивный = серый)</td></tr>
+        <tr><td><code>item_stat_card.xml</code></td><td>Дашборд</td><td>Иконка + значение + подпись + ProgressBar</td></tr>
+    </table></div>
+    <label class="check"><input type="checkbox" onchange="updateProgress()"><span class="check-box"></span><span class="check-label">Item-макеты созданы</span></label>
+</div></section>
+
+<!-- ======================== PART 6 ======================== -->
+<div class="part"><h2><span class="part-num">6</span> Адаптеры</h2></div>
+
+<section class="step" id="s20"><div class="step-head"><div class="step-num">20</div><div><h2>WorkoutAdapter</h2><div class="step-sub">Карточки тренировок с цветовым кодированием</div></div></div><div class="step-body">
+    <div class="explain"><h4>🔍 Особенности адаптера</h4><ul>
+        <li>Цвет бейджа типа определяется через <code>when(workout.type)</code> — CARDIO → красный, STRENGTH → синий и т.д.</li>
+        <li>Индикатор сложности: 1-3 точки разного цвета (🟢🟡🔴)</li>
+        <li>Если <code>isCompleted = true</code> — карточка получает полупрозрачность и значок ✅</li>
+        <li><code>updateList()</code> — для фильтрации без пересоздания адаптера</li>
+    </ul></div>
+    <label class="check"><input type="checkbox" onchange="updateProgress()"><span class="check-box"></span><span class="check-label">WorkoutAdapter создан</span></label>
+</div></section>
+
+<section class="step" id="s21"><div class="step-head"><div class="step-num">21</div><div><h2>ExerciseAdapter</h2><div class="step-sub">Список упражнений внутри тренировки</div></div></div><div class="step-body">
+    <div class="explain"><h4>🔍 Отображение упражнений</h4><ul>
+        <li>Формат: «4 × 12» (подходы × повторения) крупным шрифтом</li>
+        <li>Если <code>weight > 0</code> — показывается «60 кг», иначе «Своё тело»</li>
+        <li>Бейдж мышечной группы: «Грудь», «Ноги», «Кор»</li>
+        <li>Время отдыха: «Отдых: 90 сек»</li>
+    </ul></div>
+    <label class="check"><input type="checkbox" onchange="updateProgress()"><span class="check-box"></span><span class="check-label">ExerciseAdapter создан</span></label>
+</div></section>
+
+<!-- ======================== PART 7 ======================== -->
+<div class="part"><h2><span class="part-num">7</span> Фрагменты (логика)</h2></div>
+
+<section class="step" id="s22"><div class="step-head"><div class="step-num">22</div><div><h2>LoginFragment</h2><div class="step-sub">Вход с валидацией и имитацией аутентификации</div></div></div><div class="step-body">
+    <div class="code"><div class="code-top"><span class="code-name">ui/auth/LoginFragment.kt</span><div class="code-right"><span class="lang-badge lang-kt">Kotlin</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div></div><div class="code-body"><pre><code><span class="kw">package</span> com.example.fittracker.ui.auth
+
+<span class="kw">import</span> android.os.Bundle
+<span class="kw">import</span> android.view.*
+<span class="kw">import</span> android.widget.Toast
+<span class="kw">import</span> androidx.fragment.app.Fragment
+<span class="kw">import</span> androidx.navigation.fragment.findNavController
+<span class="kw">import</span> com.example.fittracker.R
+<span class="kw">import</span> com.example.fittracker.databinding.FragmentLoginBinding
+<span class="kw">import</span> com.example.fittracker.model.UserProfile
+<span class="kw">import</span> com.example.fittracker.repository.FitRepository
+
+<span class="kw">class</span> <span class="cls">LoginFragment</span> : <span class="cls">Fragment</span>() {
+
+    <span class="kw">private var</span> <span class="prop">_binding</span>: <span class="cls">FragmentLoginBinding</span>? = <span class="kw">null</span>
+    <span class="kw">private val</span> <span class="prop">binding</span> <span class="kw">get</span>() = _binding!!
+
+    <span class="kw">override fun</span> <span class="fn">onCreateView</span>(
+        inflater: <span class="cls">LayoutInflater</span>, container: <span class="cls">ViewGroup</span>?,
+        savedInstanceState: <span class="cls">Bundle</span>?
+    ): <span class="cls">View</span> {
+        _binding = <span class="cls">FragmentLoginBinding</span>.<span class="fn">inflate</span>(inflater, container, <span class="kw">false</span>)
+        <span class="kw">return</span> binding.root
+    }
+
+    <span class="kw">override fun</span> <span class="fn">onViewCreated</span>(view: <span class="cls">View</span>, savedInstanceState: <span class="cls">Bundle</span>?) {
+        <span class="kw">super</span>.<span class="fn">onViewCreated</span>(view, savedInstanceState)
+
+        binding.btnLogin.<span class="fn">setOnClickListener</span> {
+            <span class="kw">val</span> email = binding.etEmail.text.<span class="fn">toString</span>().<span class="fn">trim</span>()
+            <span class="kw">val</span> pass = binding.etPassword.text.<span class="fn">toString</span>().<span class="fn">trim</span>()
+
+            <span class="cmt">// Валидация</span>
+            <span class="kw">if</span> (email.<span class="fn">isEmpty</span>()) {
+                binding.etEmail.error = <span class="str">"Введите email"</span>
+                <span class="kw">return</span>@setOnClickListener
+            }
+            <span class="kw">if</span> (pass.length &lt; <span class="num">4</span>) {
+                binding.etPassword.error = <span class="str">"Минимум 4 символа"</span>
+                <span class="kw">return</span>@setOnClickListener
+            }
+
+            <span class="cmt">// Имитация входа</span>
+            FitRepository.currentUser = <span class="cls">UserProfile</span>(
+                name = email.<span class="fn">substringBefore</span>(<span class="str">"@"</span>),
+                email = email
+            )
+
+            <span class="cls">Toast</span>.<span class="fn">makeText</span>(requireContext(),
+                <span class="str">"Добро пожаловать! 💪"</span>, <span class="cls">Toast</span>.LENGTH_SHORT).<span class="fn">show</span>()
+
+            <span class="fn">findNavController</span>().<span class="fn">navigate</span>(R.id.action_login_to_main)
+        }
+
+        binding.tvGoToRegister.<span class="fn">setOnClickListener</span> {
+            <span class="fn">findNavController</span>().<span class="fn">navigate</span>(R.id.action_login_to_register)
+        }
+    }
+
+    <span class="kw">override fun</span> <span class="fn">onDestroyView</span>() {
+        <span class="kw">super</span>.<span class="fn">onDestroyView</span>()
+        _binding = <span class="kw">null</span> <span class="cmt">// предотвращает утечку памяти</span>
+    }
+}</code></pre></div></div>
+
+    <div class="explain"><h4>🔍 Анатомия фрагмента</h4><ul>
+        <li><code>_binding</code> (nullable) + <code>binding</code> (non-null getter) — стандартный паттерн ViewBinding во фрагменте. В <code>onDestroyView</code> обнуляем, потому что view может быть уничтожен раньше фрагмента.</li>
+        <li><code>return@setOnClickListener</code> — возврат из лямбды (не из функции). Без <code>@label</code> return выйдет из <code>onViewCreated</code>.</li>
+        <li><code>findNavController().navigate()</code> — безопасный переход по action ID из Navigation Graph.</li>
+    </ul></div>
+    <label class="check"><input type="checkbox" onchange="updateProgress()"><span class="check-box"></span><span class="check-label">LoginFragment создан</span></label>
+</div></section>
+
+<section class="step" id="s23"><div class="step-head"><div class="step-num">23</div><div><h2>RegisterFragment</h2><div class="step-sub">Регистрация с физическими параметрами</div></div></div><div class="step-body">
+    <p>Аналогичен LoginFragment, но с дополнительными полями: Имя, Возраст, Вес, Рост. При регистрации создаёт <code>UserProfile</code> с реальными параметрами, что позволяет рассчитывать BMI.</p>
+    <label class="check"><input type="checkbox" onchange="updateProgress()"><span class="check-box"></span><span class="check-label">RegisterFragment создан</span></label>
+</div></section>
+
+<section class="step" id="s24"><div class="step-head"><div class="step-num">24</div><div><h2>MainFragment — контейнер вкладок</h2><div class="step-sub">BottomNavigationView + вложенный NavHostFragment</div></div></div><div class="step-body">
+    <div class="explain"><h4>🔍 setupWithNavController</h4><p>Одна строка <code>bottomNav.setupWithNavController(navController)</code> связывает клики по вкладкам с навигацией. ID пунктов меню <strong>совпадают</strong> с ID фрагментов в <code>nav_main.xml</code> — это обязательное условие.</p></div>
+    <label class="check"><input type="checkbox" onchange="updateProgress()"><span class="check-box"></span><span class="check-label">MainFragment создан</span></label>
+</div></section>
+
+<section class="step" id="s25"><div class="step-head"><div class="step-num">25</div><div><h2>DashboardFragment</h2><div class="step-sub">Дашборд с метриками и прогрессом</div></div></div><div class="step-body">
+    <div class="explain"><h4>🔍 Реактивные метрики</h4><ul>
+        <li>Подписка на <code>FitRepository.todayCalories</code>, <code>todaySteps</code>, <code>todayMinutes</code></li>
+        <li>При изменении: обновляет текст, пересчитывает ProgressBar (<code>progress = current * 100 / goal</code>)</li>
+        <li>Цвет прогресса меняется: &lt;50% — красный, 50-80% — жёлтый, &gt;80% — зелёный</li>
+        <li>Горизонтальный RecyclerView с ближайшими тренировками</li>
+    </ul></div>
+    <label class="check"><input type="checkbox" onchange="updateProgress()"><span class="check-box"></span><span class="check-label">DashboardFragment создан</span></label>
+</div></section>
+
+<section class="step" id="s26"><div class="step-head"><div class="step-num">26</div><div><h2>WorkoutsFragment</h2><div class="step-sub">Список тренировок с фильтрацией</div></div></div><div class="step-body">
+    <div class="explain"><h4>🔍 Фильтрация по типу</h4><p>При клике на фильтр вызывается <code>adapter.updateList(FitRepository.getByType(type))</code>. Кнопка «Все» показывает полный список. FilterAdapter подсвечивает выбранный фильтр зелёным цветом.</p></div>
+    <label class="check"><input type="checkbox" onchange="updateProgress()"><span class="check-box"></span><span class="check-label">WorkoutsFragment создан</span></label>
+</div></section>
+
+<section class="step" id="s27"><div class="step-head"><div class="step-num">27</div><div><h2>StatsFragment</h2><div class="step-sub">Статистика: итоги, график, BMI</div></div></div><div class="step-body">
+    <div class="explain"><h4>🔍 Построение «графика» из View</h4><p>Создаём 7 View в LinearLayout (horizontal). Для каждого дня программно задаём <code>layoutParams.height</code> пропорционально калориям: <code>maxHeight * (cals / maxCals)</code>. Фон — скруглённый градиент. Под каждым столбиком — текст с днём недели.</p></div>
+    <label class="check"><input type="checkbox" onchange="updateProgress()"><span class="check-box"></span><span class="check-label">StatsFragment создан</span></label>
+</div></section>
+
+<section class="step" id="s28"><div class="step-head"><div class="step-num">28</div><div><h2>ProfileFragment</h2><div class="step-sub">Профиль с параметрами, целями и выходом</div></div></div><div class="step-body">
+    <div class="explain"><h4>🔍 BMI-индикатор</h4><p>Рассчитывается из <code>UserProfile.bmi</code>. Отображается как цветная полоска с маркером: зелёный (норма), жёлтый (превышение), красный (ожирение). Категория выводится текстом.</p></div>
+    <label class="check"><input type="checkbox" onchange="updateProgress()"><span class="check-box"></span><span class="check-label">ProfileFragment создан</span></label>
+</div></section>
+
+<section class="step" id="s29"><div class="step-head"><div class="step-num">29</div><div><h2>WorkoutDetailFragment</h2><div class="step-sub">Детали тренировки и кнопка «Завершить»</div></div></div><div class="step-body">
+    <div class="code"><div class="code-top"><span class="code-name">ui/detail/WorkoutDetailFragment.kt (ключевая часть)</span><div class="code-right"><span class="lang-badge lang-kt">Kotlin</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div></div><div class="code-body"><pre><code><span class="cmt">// В onViewCreated:</span>
+<span class="kw">val</span> workoutId = arguments?.<span class="fn">getInt</span>(<span class="str">"workoutId"</span>) ?: <span class="kw">return</span>
+<span class="kw">val</span> workout = FitRepository.<span class="fn">getById</span>(workoutId) ?: <span class="kw">return</span>
+
+<span class="cmt">// Заполнение данных</span>
+binding.tvName.text = workout.name
+binding.tvType.text = <span class="str">"${workout.type.emoji} ${workout.type.label}"</span>
+binding.tvDuration.text = <span class="str">"${workout.durationMin} мин"</span>
+binding.tvCalories.text = <span class="str">"${workout.calories} ккал"</span>
+binding.tvDifficulty.text = workout.difficulty.label
+binding.tvExerciseCount.text = <span class="str">"${workout.exercises.size} упражнений"</span>
+
+<span class="cmt">// Список упражнений</span>
+binding.rvExercises.layoutManager = <span class="cls">LinearLayoutManager</span>(requireContext())
+binding.rvExercises.adapter = <span class="cls">ExerciseAdapter</span>(workout.exercises)
+
+<span class="cmt">// Кнопка завершения</span>
+binding.btnComplete.<span class="fn">setOnClickListener</span> {
+    FitRepository.<span class="fn">completeWorkout</span>(workout.id)
+    <span class="cls">Toast</span>.<span class="fn">makeText</span>(requireContext(),
+        <span class="str">"Тренировка завершена! 🎉 +${workout.calories} ккал"</span>,
+        <span class="cls">Toast</span>.LENGTH_LONG).<span class="fn">show</span>()
+    <span class="fn">findNavController</span>().<span class="fn">navigateUp</span>()
+}
+
+<span class="cmt">// Кнопка назад</span>
+binding.btnBack.<span class="fn">setOnClickListener</span> {
+    <span class="fn">findNavController</span>().<span class="fn">navigateUp</span>()
+}</code></pre></div></div>
+
+    <div class="explain"><h4>🔍 Цепочка обновлений</h4><p>Когда пользователь нажимает «Завершить»:<br>
+    1. <code>FitRepository.completeWorkout()</code> ставит <code>isCompleted = true</code><br>
+    2. Обновляет <code>todayCalories</code>, <code>todayMinutes</code>, <code>weeklyWorkouts</code><br>
+    3. LiveData триггерит обновление всех подписчиков<br>
+    4. DashboardFragment автоматически обновляет метрики и ProgressBar-ы<br>
+    5. StatsFragment пересчитывает итоги<br>
+    <strong>Ни одна из этих обновлений не требует ручного вызова</strong> — это сила реактивного подхода с LiveData!</p></div>
+    <label class="check"><input type="checkbox" onchange="updateProgress()"><span class="check-box"></span><span class="check-label">WorkoutDetailFragment создан</span></label>
+</div></section>
+
+<!-- ======================== PART 8 ======================== -->
+<div class="part"><h2><span class="part-num">8</span> Финализация</h2></div>
+
+<section class="step" id="s30"><div class="step-head"><div class="step-num">30</div><div><h2>MainActivity</h2><div class="step-sub">Минимальный код — Single Activity Architecture</div></div></div><div class="step-body">
+    <div class="code"><div class="code-top"><span class="code-name">MainActivity.kt</span><div class="code-right"><span class="lang-badge lang-kt">Kotlin</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div></div><div class="code-body"><pre><code><span class="kw">package</span> com.example.fittracker
+
+<span class="kw">import</span> android.os.Bundle
+<span class="kw">import</span> androidx.appcompat.app.AppCompatActivity
+
+<span class="kw">class</span> <span class="cls">MainActivity</span> : <span class="cls">AppCompatActivity</span>() {
+    <span class="kw">override fun</span> <span class="fn">onCreate</span>(savedInstanceState: <span class="cls">Bundle</span>?) {
+        <span class="kw">super</span>.<span class="fn">onCreate</span>(savedInstanceState)
+        <span class="fn">setContentView</span>(R.layout.activity_main)
+    }
+}</code></pre></div></div>
+    <label class="check"><input type="checkbox" onchange="updateProgress()"><span class="check-box"></span><span class="check-label">MainActivity обновлён</span></label>
+</div></section>
+
+<section class="step" id="s31"><div class="step-head"><div class="step-num">31</div><div><h2>Запуск и тестирование 🚀</h2><div class="step-sub">Проверяем все пользовательские сценарии</div></div></div><div class="step-body">
+    <ol>
+        <li><strong>Build → Rebuild Project</strong></li>
+        <li>Запустите на эмуляторе или устройстве</li>
+        <li>Проверьте каждый сценарий:</li>
+    </ol>
+
+    <div class="tbl"><table>
+        <tr><th>#</th><th>Действие</th><th>Ожидаемый результат</th></tr>
+        <tr><td>1</td><td>Запуск</td><td>Экран логина с 💪</td></tr>
+        <tr><td>2</td><td>Пустой логин → «Войти»</td><td>Ошибки валидации</td></tr>
+        <tr><td>3</td><td>Ввести данные → «Войти»</td><td>Дашборд с метриками</td></tr>
+        <tr><td>4</td><td>Дашборд: карточки прогресса</td><td>Калории, шаги, минуты с ProgressBar</td></tr>
+        <tr><td>5</td><td>Вкладка «Тренировки»</td><td>Список с фильтрами по типу</td></tr>
+        <tr><td>6</td><td>Фильтр «Кардио»</td><td>Только кардио-тренировки</td></tr>
+        <tr><td>7</td><td>Нажать на тренировку</td><td>Экран деталей с упражнениями</td></tr>
+        <tr><td>8</td><td>«Завершить тренировку»</td><td>Toast + возврат + обновлённые метрики</td></tr>
+        <tr><td>9</td><td>Вкладка «Статистика»</td><td>Итоги + график + BMI</td></tr>
+        <tr><td>10</td><td>Вкладка «Профиль»</td><td>Данные, параметры, цели</td></tr>
+        <tr><td>11</td><td>«Выйти»</td><td>Возврат на логин</td></tr>
+    </table></div>
+
+    <label class="check"><input type="checkbox" onchange="updateProgress()"><span class="check-box"></span><span class="check-label">Приложение запущено и работает! 🎉</span></label>
+
+    <div class="callout c-success" style="margin-top:20px;">
+        <span class="callout-icon">🏆</span>
+        <div><strong>Поздравляем!</strong> Вы создали фитнес-трекер с авторизацией, дашбордом прогресса, каталогом тренировок, статистикой и профилем!</div>
+    </div>
+
+    <div class="explain" style="margin-top:20px;">
+        <h4>🚀 Идеи для развития</h4>
+        <ul>
+            <li><strong>Room Database</strong> — сохранение тренировок между сессиями</li>
+            <li><strong>WorkManager</strong> — напоминания о тренировке</li>
+            <li><strong>HealthConnect API</strong> — интеграция с Google Fit</li>
+            <li><strong>MPAndroidChart</strong> — красивые интерактивные графики</li>
+            <li><strong>Таймер тренировки</strong> — обратный отсчёт для каждого упражнения</li>
+            <li><strong>SharedPreferences</strong> — сохранение авторизации</li>
+            <li><strong>Экспорт в PDF</strong> — отчёт о прогрессе</li>
+            <li><strong>Dark Theme</strong> — тёмная тема для вечерних тренировок</li>
+        </ul>
+    </div>
+</div></section>
+
+</main>
+</div>
+
+<button class="top-btn" id="topBtn" onclick="window.scrollTo({top:0})" aria-label="Наверх">↑</button>
+
+<script>
+// Theme
+function toggleTheme() {
+    const h = document.documentElement;
+    const b = document.getElementById('themeBtn');
+    if (h.dataset.theme === 'dark') {
+        h.dataset.theme = 'light'; b.textContent = '☀️';
+        localStorage.setItem('fit_theme','light');
+    } else {
+        h.dataset.theme = 'dark'; b.textContent = '🌙';
+        localStorage.setItem('fit_theme','dark');
+    }
+}
+(function(){
+    const s = localStorage.getItem('fit_theme');
+    if (s) { document.documentElement.dataset.theme = s;
+        document.getElementById('themeBtn').textContent = s==='light'?'☀️':'🌙'; }
+})();
+
+// Copy
+function copyCode(btn) {
+    const code = btn.closest('.code').querySelector('code').textContent;
+    navigator.clipboard.writeText(code).then(()=>{
+        btn.textContent='✅ OK'; btn.classList.add('ok');
+        setTimeout(()=>{ btn.textContent='📋 Copy'; btn.classList.remove('ok'); },1800);
+    });
+}
+
+// Collapsible
+function toggleColl(h){ h.parentElement.classList.toggle('open'); }
+
+// Sidebar
+function toggleSidebar(){
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('overlay').classList.toggle('on');
+}
+
+// Progress
+function updateProgress(){
+    const all = document.querySelectorAll('.check input');
+    const done = document.querySelectorAll('.check input:checked');
+    const pct = Math.round(done.length/all.length*100);
+    document.getElementById('pbar').style.width = pct+'%';
+    document.getElementById('pctText').textContent = pct+'%';
+    document.getElementById('doneCount').textContent = done.length;
+    const st={}; all.forEach((c,i)=>st[i]=c.checked);
+    localStorage.setItem('fit_progress',JSON.stringify(st));
+}
+(function(){
+    const s = localStorage.getItem('fit_progress');
+    if(s){ const st=JSON.parse(s);
+        document.querySelectorAll('.check input').forEach((c,i)=>{if(st[i])c.checked=true;});
+        updateProgress();
+    }
+})();
+
+// Scroll
+window.addEventListener('scroll',()=>{
+    const t=document.getElementById('topBtn');
+    t.classList.toggle('show', window.scrollY>300);
+    const secs=document.querySelectorAll('.step');
+    const links=document.querySelectorAll('.sidebar-nav a');
+    let cur='';
+    secs.forEach(s=>{ if(s.getBoundingClientRect().top<=100) cur=s.id; });
+    links.forEach(l=>{ l.classList.toggle('active', l.getAttribute('href')==='#'+cur); });
+});
+
+// Close sidebar on mobile nav click
+document.querySelectorAll('.sidebar-nav a').forEach(l=>{
+    l.addEventListener('click',()=>{
+        if(window.innerWidth<=1024){
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('overlay').classList.remove('on');
+        }
+    });
+});
+</script>
+</body>
+</html>
